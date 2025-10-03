@@ -3,45 +3,52 @@ from abc import abstractmethod
 
 from bot.database.schemas import Guild
 
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-class DiscordServerRepository(Protocol):
+
+class GuildRepository(Protocol):
     """
     Declare all methods used by the bot to interact with the database.
     The data could be from a database or an api.
     """
 
     @abstractmethod
-    def get_discord_server_by_id(self, discord_server_id: int) -> DiscordServer:
+    async def get_guild_by_id(self, guild_id: int) -> Guild:
         """
-        Get a discord server by its id.
-        :param discord_server_id:
+        Get a guild by its id.
+        :param guild_id:
         :return:
         """
         ...
 
     @abstractmethod
-    def create_discord_server(self, discord_server: DiscordServer) -> DiscordServer:
+    async def create_guild(self, guild: Guild) -> Guild:
         """
-        Create a discord server.
-        :param discord_server:
+        Create a guild.
+        :param guild:
         :return:
         """
         ...
 
     @abstractmethod
-    def update_discord_server(self, discord_server: DiscordServer) -> DiscordServer:
+    async def update_guild(self, guild: Guild) -> Guild:
         """
-        Update a discord server data.
-        :param discord_server:
+        Update a guild data.
+        :param guild:
         :return:
         """
         ...
 
     @abstractmethod
-    def remove_discord_server(self, discord_server: DiscordServer) -> None:
+    async def remove_guild(self, guild: Guild) -> None:
         """
-        Remove a discord server.
-        :param discord_server:
+        Remove a guild.
+        :param guild:
         :return:
         """
         ...
+
+
+class SQLAlchemyGuildRepository:
+    def __init__(self, session_factory: async_sessionmaker):
+        self.session_factory = session_factory

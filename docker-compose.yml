@@ -1,0 +1,47 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Production environment
+  bot-prod:
+    # Build image from Dockerfile in the current directory
+    build:
+      context: .
+      target: production
+    # Name of the image created and container name
+    image: ir-discord-bot:latest
+    container_name: ir-discord-bot-prod
+    # Load environment variables from .env file
+    env_file:
+      - .env
+    # Restart the container if it crashes
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          # Limit the container to 50% of a CPU
+          cpus: '0.50'
+          # Limit the container to 512 Mo of RAM
+          memory: 512M
+        reservations:
+          # Reserve 25% of a CPU
+          cpus: '0.25'
+          # Reserve 128 Mo of RAM
+          memory: 128M
+
+  # Development environment
+  bot-dev:
+    build:
+      context: .
+      target: development
+    container_name: ir-discord-bot-dev
+    env_file:
+      - .env.dev
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./bot
+          target: /app/bot/
+
+        - action: rebuild
+          path: requirements.txt
