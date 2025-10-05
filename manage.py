@@ -7,11 +7,12 @@ import pathlib
 import subprocess
 
 # --- Configuration du script ---
-MIN_PYTHON_VERSION = (3, 13)
+MIN_PYTHON_VERSION = (3, 12)
 VENV_DIR = ".venv"
 REQUIREMENTS_FILE = "requirements.txt"
 ENV_EXAMPLE_FILE = ".env.example"
 ENV_FILE = ".env"
+DEV_ENV_FILE = ".env.dev"
 
 
 # --- Fonctions utilitaires ---
@@ -92,6 +93,9 @@ def command_setup():
 
 def command_run_local():
     """Lance le bot directement en local."""
+    if not pathlib.Path(DEV_ENV_FILE).exists():
+        print(f"⚠️ {DEV_ENV_FILE} n'existe pas dans le fichier.")
+        raise FileNotFoundError(DEV_ENV_FILE)
     print("🚀 Lancement du bot en local...")
     os.environ["ENV"] = "dev"
     python_venv = _get_python_executable()

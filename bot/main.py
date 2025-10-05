@@ -3,9 +3,12 @@ import asyncio
 
 from .utils.logging_setup import setup_logging
 from .core.config import get_settings
-from .database.data.engine import engine
+from .database.data.engine import engine, AsyncSession
 from .database.models import Base
 from .cogs import ALL_COGS
+
+from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityLevelRepository, \
+    SQLAlchemyInfractionsRepository
 
 from discord import Bot, Intents
 
@@ -61,6 +64,19 @@ class IRBot(Bot):
     @property
     def settings(self):
         return get_settings()
+
+    # Database repository
+    @property
+    def db_guilds(self):
+        return SQLAlchemyGuildRepository(AsyncSession)
+
+    @property
+    def db_gravity_levels(self):
+        return SQLAlchemyGravityLevelRepository(AsyncSession)
+
+    @property
+    def db_infractions(self):
+        return SQLAlchemyInfractionsRepository(AsyncSession)
 
 
 bot: IRBot | None = None

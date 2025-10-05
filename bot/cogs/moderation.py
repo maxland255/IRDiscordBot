@@ -1,11 +1,15 @@
 import logging
+import asyncio
 
 from discord import Cog, ApplicationContext, SlashCommandGroup, Option, Member, guild_only, Permissions, \
-    InteractionContextType
+    InteractionContextType, AutocompleteContext
 
 from typing import TYPE_CHECKING
 
 from datetime import datetime, timedelta, UTC
+
+from bot.database.schemas import GravityLevelSchema
+from bot.utils.bot_extensions import get_bot_top_role
 
 if TYPE_CHECKING:
     from bot.main import IRBot
@@ -24,6 +28,15 @@ class Moderation(Cog):
         contexts={InteractionContextType.guild},
     )
 
+    @staticmethod
+    def get_gravity_levels(ctx: AutocompleteContext) -> list[str]:
+        loop = asyncio.get_event_loop()
+        gravity_levels = loop.run_until_complete(
+            ctx.bot.db_gravity_levels.get_all_gravity_level(ctx.interaction.guild.id)
+        )
+
+        return [g.name for g in gravity_levels]
+
     # Commands
     @moderator.command(
         name="timeout",
@@ -37,8 +50,29 @@ class Moderation(Cog):
                 Member,
                 required=True,
             ),
+            gravity: str = Option(
+                str,
+                autocomplete=get_gravity_levels,
+                required=True,
+            ),
+            reason: str = Option(
+                str,
+                required=True,
+            )
     ):
         try:
+            await ctx.defer(ephemeral=True)
+
+            if member.top_role >= await get_bot_top_role(self.bot, ctx.guild):
+                await ctx.respond(f"I do not have permission to timeout {member.mention}.")
+                return
+
+            if member.guild_permissions.administrator:
+                await ctx.respond(f"{member.mention} is an administrator, they cannot be timed out.")
+                return
+
+            ###############################
+
             member_roles = member.roles
 
             for role in member_roles:
@@ -56,6 +90,30 @@ class Moderation(Cog):
         except Exception as e:
             logger.error("An error occurred while running the timeout command: %s", e, exc_info=True)
             await ctx.respond(f"An error occurred while running the timeout command", ephemeral=True)
+
+    # @staticmethod
+    # def autocomplete(ctx: AutocompleteContext):
+    #     print(ctx.command)
+    #     print(ctx.value)
+    #     print(ctx.interaction)
+    #     print(ctx.options)
+    #     print(type(ctx.bot))
+    #
+    #     return ["low", "medium", "high"]
+    #
+    # @moderator.command(
+    #     name="test"
+    # )
+    # async def test(
+    #         self,
+    #         ctx: ApplicationContext,
+    #         member: Member = Option(Member),
+    #         gravity: str = Option(
+    #             str,
+    #             autocomplete=autocomplete
+    #         )
+    # ):
+    #     await ctx.respond(f"Testing {gravity}.", ephemeral=True)
 
     # Listener / Event
     # @Cog.listener()
