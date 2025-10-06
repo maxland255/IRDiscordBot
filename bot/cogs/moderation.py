@@ -1,5 +1,4 @@
 import logging
-import asyncio
 
 from discord import Cog, ApplicationContext, SlashCommandGroup, Option, Member, guild_only, Permissions, \
     InteractionContextType, AutocompleteContext
@@ -17,6 +16,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+async def get_gravity_levels(ctx: AutocompleteContext) -> list[str]:
+    gravity_levels: list[GravityLevelSchema] = await ctx.bot.db_gravity_levels.get_all_gravity_level(
+        ctx.interaction.guild.id)
+
+    return [g.name for g in gravity_levels]
+
+
 class Moderation(Cog):
     def __init__(self, bot: "IRBot"):
         self.bot = bot
@@ -27,15 +33,6 @@ class Moderation(Cog):
         default_member_permissions=Permissions(moderate_members=True),
         contexts={InteractionContextType.guild},
     )
-
-    @staticmethod
-    def get_gravity_levels(ctx: AutocompleteContext) -> list[str]:
-        loop = asyncio.get_event_loop()
-        gravity_levels = loop.run_until_complete(
-            ctx.bot.db_gravity_levels.get_all_gravity_level(ctx.interaction.guild.id)
-        )
-
-        return [g.name for g in gravity_levels]
 
     # Commands
     @moderator.command(
@@ -69,6 +66,12 @@ class Moderation(Cog):
 
             if member.guild_permissions.administrator:
                 await ctx.respond(f"{member.mention} is an administrator, they cannot be timed out.")
+                return
+
+            gravity_level = await self.bot.db_gravity_levels.get_gravity_level_by_name(gravity)
+
+            if gravity_level is None:
+                await ctx.respond(f"Gravity level with name {gravity} not found.")
                 return
 
             ###############################

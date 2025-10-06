@@ -14,12 +14,17 @@ class GuildNotFound(Exception):
 
 
 class GravityLevelNotFound(Exception):
-    def __init__(self, gravity_level: Union[int, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate]) -> None:
+    def __init__(self,
+                 gravity_level: Union[int, str, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate]) -> None:
         self.gravity_level = gravity_level
 
     def __str__(self) -> str:
         if isinstance(self.gravity_level, int):
             return f"Gravity Level {self.gravity_level} not found"
+
+        if isinstance(self.gravity_level, str):
+            return f"Gravity Level {self.gravity_level} not found"
+
         return f"Gravity Level {self.gravity_level.id} | {self.gravity_level.name} not found"
 
 

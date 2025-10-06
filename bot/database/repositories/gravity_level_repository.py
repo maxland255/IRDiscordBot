@@ -33,6 +33,16 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    async def get_gravity_level_by_name(self, gravity_level_name: str, raise_if_not_found: bool = False) -> Union[
+        GravityLevelSchema, None]:
+        """
+        Get specific Gravity Level data.
+        :param gravity_level_name:
+        :param raise_if_not_found:
+        :return:
+        """
+        ...
+
     async def create_gravity_level(self, gravity_level: GravityLevelCreate) -> GravityLevelSchema:
         """
         Create Gravity Level data.
@@ -94,6 +104,23 @@ class SQLAlchemyGravityLevelRepository(GravityLevelRepository):
             if db_gravity_level is None:
                 if raise_if_not_found:
                     raise GravityLevelNotFound(gravity_level_id)
+                else:
+                    return None
+
+            return GravityLevelSchema.model_validate(db_gravity_level)
+
+    async def get_gravity_level_by_name(self, gravity_level_name: str, raise_if_not_found: bool = False) -> Union[
+        GravityLevelSchema, None]:
+        async with self.session_factory() as session:
+            result = await session.execute(
+                select(GravityLevel).where(GravityLevel.name == gravity_level_name)
+            )
+
+            db_gravity_level = result.scalar_one_or_none()
+
+            if db_gravity_level is None:
+                if raise_if_not_found:
+                    raise GravityLevelNotFound(gravity_level_name)
                 else:
                     return None
 
