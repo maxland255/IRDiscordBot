@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 from typing import Union
 from datetime import datetime
 
-from .schemas import InfractionType
+from .schemas import InfractionType, InfractionResult
 
 
 class Base(DeclarativeBase):
@@ -19,6 +19,8 @@ class Guild(Base):
     name: Mapped[str] = mapped_column(String(50), nullable=False)
 
     warn_height: Mapped[float] = mapped_column(Float, nullable=False, default=0.2)
+
+    default_timeout: Mapped[int] = mapped_column(Integer, nullable=False, default=600)
 
     # salon de logs
     logs_moderation: Mapped[Union[int, None]] = mapped_column(Integer, default=None)
@@ -36,7 +38,7 @@ class GravityLevel(Base):
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False)
 
     name: Mapped[str] = mapped_column(String(25), nullable=False, unique=True)
-    
+
     description: Mapped[str] = mapped_column(String(100), nullable=False)
     weight: Mapped[float] = mapped_column(Float, nullable=False)
 
@@ -58,12 +60,14 @@ class Infractions(Base):
 
     infraction_type: Mapped[InfractionType] = mapped_column(Enum(InfractionType), nullable=False)
 
-    gravity_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("gravity_levels.id", ondelete="RESTRICT"),
-                                            nullable=False)
-    gravity: Mapped[GravityLevel] = relationship(GravityLevel)
+    gravity_id: Mapped[Union[int, None]] = mapped_column(BigInteger,
+                                                         ForeignKey("gravity_levels.id", ondelete="RESTRICT"),
+                                                         nullable=True)
+    gravity: Mapped[Union[GravityLevel, None]] = relationship(GravityLevel)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now)
 
+    infraction_result: Mapped[InfractionResult] = mapped_column(Enum(InfractionResult), nullable=False)
     timeout_end: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True)
 
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

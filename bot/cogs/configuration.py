@@ -46,6 +46,14 @@ class Configuration(Cog):
                 min_value=0.1,
                 max_value=1.0,
             ),
+            default_timeout: int = Option(
+                int,
+                name="default-timeout",
+                description="Default timeout in seconds",
+                default=600,
+                min_value=60,
+                max_value=1800,
+            ),
             logs_moderation: Optional[TextChannel] = Option(
                 TextChannel,
                 channel_types=ChannelType.text,
@@ -70,35 +78,14 @@ class Configuration(Cog):
                 id=ctx.guild.id,
                 name=ctx.guild.name,
                 warn_height=warn_height,
+                default_timeout=default_timeout,
                 logs_moderation=logs_moderation.id if logs_moderation is not None else None,
                 logs_server=logs_server.id if logs_server is not None else None,
             )
 
             new_guild = await self.bot.db_guilds.create_guild(new_guild_schema)
 
-            guild_config_embed = Embed(
-                title=f"{new_guild.name} configuration",
-                type="auto_moderation_message",
-                color=Color.dark_blue(),
-            )
-
-            guild_config_embed.add_field(
-                name="Warn height",
-                value=str(warn_height),
-                inline=False,
-            )
-
-            guild_config_embed.add_field(
-                name="Logs moderation",
-                value=logs_moderation.mention if logs_moderation else "Not configured",
-                inline=False,
-            )
-
-            guild_config_embed.add_field(
-                name="Logs server",
-                value=logs_server.mention if logs_server else "Not configured",
-                inline=False,
-            )
+            guild_config_embed = await self.print_configuration(new_guild, new_guild_schema)
 
             await ctx.respond(embed=guild_config_embed)
         except Exception as e:
@@ -117,6 +104,13 @@ class Configuration(Cog):
                 name="warn-height",
                 min_value=0.1,
                 max_value=1.0,
+            ),
+            default_timeout: Optional[int] = Option(
+                int,
+                name="default-timeout",
+                description="Default timeout in seconds",
+                min_value=60,
+                max_value=1800,
             ),
             logs_moderation: Optional[TextChannel] = Option(
                 TextChannel,
@@ -137,6 +131,9 @@ class Configuration(Cog):
 
             if warn_height is not None:
                 updated_guild.warn_height = warn_height
+
+            if default_timeout is not None:
+                updated_guild.default_timeout = default_timeout
 
             if logs_moderation is not None:
                 updated_guild.logs_moderation = logs_moderation.id
@@ -398,6 +395,12 @@ class Configuration(Cog):
         guild_config_embed.add_field(
             name="Warn height",
             value=str(guild_config.warn_height),
+            inline=False,
+        )
+
+        guild_config_embed.add_field(
+            name="Default timeout",
+            value=f"{guild_config.default_timeout} seconds",
             inline=False,
         )
 

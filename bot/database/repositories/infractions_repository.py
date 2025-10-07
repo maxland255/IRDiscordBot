@@ -7,6 +7,7 @@ from bot.database.schemas import InfractionsSchema, InfractionsCreate, Infractio
 from bot.exception import InfractionNotFound
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
@@ -75,7 +76,9 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
     async def get_all_infractions(self, guild_id: int) -> List[InfractionsSchema]:
         async with self.session_factory() as session:
             result = await session.execute(
-                select(Infractions).where(Infractions.guild_id == guild_id)
+                select(Infractions)
+                .where(Infractions.guild_id == guild_id)
+                .options(selectinload(Infractions.gravity))
             )
 
             db_infractions = result.scalars().all()
@@ -88,6 +91,7 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
                 select(Infractions)
                 .where(Infractions.guild_id == guild_id)
                 .where(Infractions.user_id == user_id)
+                .options(selectinload(Infractions.gravity))
             )
 
             db_infractions = result.scalars().all()
@@ -98,7 +102,9 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
                                    raise_if_not_found: bool = False) -> InfractionsSchema | None:
         async with self.session_factory() as session:
             result = await session.execute(
-                select(Infractions).where(Infractions.id == infraction_id)
+                select(Infractions)
+                .where(Infractions.id == infraction_id)
+                .options(selectinload(Infractions.gravity))
             )
 
             db_infractions = result.scalar_one_or_none()
@@ -119,11 +125,15 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
             await session.commit()
             await session.refresh(db_infraction)
 
-            return InfractionsSchema.model_validate(db_infraction)
+            return await self.get_infraction_by_id(db_infraction.id, raise_if_not_found=True)
 
     async def update_infraction(self, infraction: InfractionsUpdate) -> InfractionsSchema:
         async with self.session_factory() as session:
-            db_infraction = await session.get(Infractions, infraction.id)
+            db_infraction = await session.get(
+                Infractions,
+                infraction.id,
+                options=[selectinload(Infractions.gravity)],
+            )
 
             if db_infraction is None:
                 raise InfractionNotFound(infraction)

@@ -11,6 +11,9 @@ class GuildSchema(BaseModel):
     # Height for all warnings
     warn_height: float
 
+    # Default timeout in seconds
+    default_timeout: int
+
     # salon de logs
     logs_moderation: int | None
     logs_server: int | None
@@ -30,6 +33,9 @@ class GuildUpdate(BaseModel):
 
     # Height for all warnings
     warn_height: Optional[float] = Field(None)
+
+    # Default timeout in seconds
+    default_timeout: Optional[int] = Field(None)
 
     # salon de logs
     logs_moderation: Optional[int] = Field(None)
