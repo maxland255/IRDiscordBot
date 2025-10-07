@@ -1,11 +1,11 @@
-from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boolean, ForeignKey
+from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boolean, ForeignKey, JSON, Index
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from typing import Union
 from datetime import datetime
 
-from .schemas import InfractionType, InfractionResult
+from .schemas import InfractionType, InfractionResult, LogEntryType
 
 
 class Base(DeclarativeBase):
@@ -25,6 +25,9 @@ class Guild(Base):
     # salon de logs
     logs_moderation: Mapped[Union[int, None]] = mapped_column(Integer, default=None)
     logs_server: Mapped[Union[int, None]] = mapped_column(Integer, default=None)
+
+    # Rules
+    rules_message_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
 
     deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
 
@@ -73,3 +76,20 @@ class Infractions(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+
+
+class LogEntry(Base):
+    __tablename__ = "logs"
+    __table_args__ = {'sqlite_autoincrement': True}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False)
+
+    log_type: Mapped[LogEntryType] = mapped_column(Enum(LogEntryType), nullable=False, index=True)
+
+    actor_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False, index=True)
+    target_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False, index=True)
+
+    details: Mapped[dict] = mapped_column(JSON, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now)

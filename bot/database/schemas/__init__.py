@@ -1,6 +1,7 @@
 from .guild import GuildSchema, GuildUpdate
 from .infractions import InfractionType, InfractionResult, InfractionsCreate, InfractionsSchema, InfractionsUpdate
 from .gravity_level import GravityLevelCreate, GravityLevelSchema, GravityLevelUpdate
+from .log_entry import LogEntryType
 
 __all__ = [
     "GuildSchema",
@@ -13,4 +14,5 @@ __all__ = [
     "GravityLevelCreate",
     "GravityLevelSchema",
     "GravityLevelUpdate",
+    "LogEntryType",
 ]

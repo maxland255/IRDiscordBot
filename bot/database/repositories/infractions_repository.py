@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Protocol, List, Union
 
 from datetime import datetime, UTC
@@ -13,10 +14,11 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 class InfractionsRepository(Protocol):
     """
-    Declare all methode available in the Infractions Repository.
+    Declare all methode available in the Infraction Repository.
     This is the unique API for all data sources.
     """
 
+    @abstractmethod
     async def get_all_infractions(self, guild_id: int) -> List[InfractionsSchema]:
         """
         Get all Infractions data.
@@ -25,6 +27,7 @@ class InfractionsRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def get_all_infractions_by_user(self, guild_id: int, user_id: int) -> List[InfractionsSchema]:
         """
         Get all Infractions data for a specific user.
@@ -34,6 +37,7 @@ class InfractionsRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def get_infraction_by_id(self, infraction_id: int,
                                    raise_if_not_found: bool = False) -> InfractionsSchema | None:
         """
@@ -44,6 +48,7 @@ class InfractionsRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def create_infraction(self, infraction: InfractionsCreate) -> InfractionsSchema:
         """
         Create Infraction data.
@@ -52,6 +57,7 @@ class InfractionsRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def update_infraction(self, infraction: InfractionsUpdate) -> InfractionsSchema:
         """
         Update specific Infraction data.
@@ -60,6 +66,7 @@ class InfractionsRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def delete_infraction_by_id(self, infraction_id: int) -> Union[InfractionsSchema, None]:
         """
         Delete a specific Infraction data.

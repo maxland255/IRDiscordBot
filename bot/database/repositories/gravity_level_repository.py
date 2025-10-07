@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from datetime import datetime, UTC
 
 from typing import Protocol, List, Union
@@ -16,6 +17,7 @@ class GravityLevelRepository(Protocol):
     This is the unique API for all data sources.
     """
 
+    @abstractmethod
     async def get_all_gravity_level(self, guild_id: int) -> List[GravityLevelSchema]:
         """
         Get all Gravity Level data.
@@ -23,6 +25,7 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def get_gravity_level_by_id(self, gravity_level_id: int, raise_if_not_found: bool = False) -> Union[
         GravityLevelSchema, None]:
         """
@@ -33,6 +36,7 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def get_gravity_level_by_name(self, gravity_level_name: str, raise_if_not_found: bool = False) -> Union[
         GravityLevelSchema, None]:
         """
@@ -43,6 +47,7 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def create_gravity_level(self, gravity_level: GravityLevelCreate) -> GravityLevelSchema:
         """
         Create Gravity Level data.
@@ -51,6 +56,7 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def update_gravity_level(self, gravity_level: GravityLevelUpdate) -> GravityLevelSchema:
         """
         Update specific Gravity Level data.
@@ -59,6 +65,7 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def delete_gravity_level(self, gravity_level: GravityLevelSchema) -> None:
         """
         Soft delete specific Gravity Level data.
@@ -67,6 +74,7 @@ class GravityLevelRepository(Protocol):
         """
         ...
 
+    @abstractmethod
     async def delete_gravity_level_by_id(self, gravity_level_id: int) -> None:
         """
         Soft delete specific Gravity Level data.

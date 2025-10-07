@@ -49,22 +49,3 @@ async def calculate_timeout_duration(infractions: list[InfractionsSchema],
     until = datetime.now(UTC) + timedelta(seconds=timeout_seconds)
 
     return until
-
-    # current_infractions_weight = gravity_level.weight if gravity_level is not None else weight
-    #
-    # base_timeout = guild_config.default_timeout
-    # timeout_duration = base_timeout * current_infractions_weight
-    #
-    # multiplier = 1.0
-    #
-    # for infraction in infractions:
-    #     if infraction.infraction_type == InfractionType.warn:
-    #         multiplier += guild_config.warn_height
-    #     elif infraction.infraction_type == InfractionType.timeout:
-    #         multiplier += infraction.gravity.weight
-    #
-    # timeout_duration *= multiplier
-    #
-    # until = datetime.now(UTC) + timedelta(seconds=timeout_duration)
-    #
-    # return until

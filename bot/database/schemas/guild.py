@@ -18,6 +18,8 @@ class GuildSchema(BaseModel):
     logs_moderation: int | None
     logs_server: int | None
 
+    rules_message_id: int | None
+
     # tickets system
     # pass
 
@@ -40,5 +42,7 @@ class GuildUpdate(BaseModel):
     # salon de logs
     logs_moderation: Optional[int] = Field(None)
     logs_server: Optional[int] = Field(None)
+
+    rules_message_id: int | None = Field(None)
 
     deleted_at: datetime | None = Field(None)

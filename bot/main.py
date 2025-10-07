@@ -6,6 +6,7 @@ from .core.config import get_settings
 from .database.data.engine import engine, AsyncSession
 from .database.models import Base
 from .cogs import ALL_COGS
+from .loggers import BotLogger
 
 from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityLevelRepository, \
     SQLAlchemyInfractionsRepository
@@ -64,6 +65,11 @@ class IRBot(Bot):
     @property
     def settings(self):
         return get_settings()
+
+    # Bot logger
+    @property
+    def logger(self):
+        return BotLogger(self)
 
     # Database repository
     @property
