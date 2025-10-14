@@ -7,6 +7,7 @@ from discord import Color
 from typing import Optional
 
 from .gravity_level import GravityLevelSchema
+from .log_entry import LogEntryType
 
 
 class InfractionType(str, Enum):
@@ -33,6 +34,19 @@ class InfractionResult(str, Enum):
     kick = "kick"
     ban = "ban"
     none = "none"
+
+    def to_log_entry_type(self) -> LogEntryType:
+        match self:
+            case InfractionResult.warn:
+                return LogEntryType.infraction_warn
+            case InfractionResult.timeout:
+                return LogEntryType.infraction_timeout
+            case InfractionResult.kick:
+                return LogEntryType.infraction_kick
+            case InfractionResult.ban:
+                return LogEntryType.infraction_ban
+            case InfractionResult.none:
+                raise ValueError("InfractionResult 'none' cannot be converted to a LogEntryType.")
 
 
 class InfractionsCreate(BaseModel):

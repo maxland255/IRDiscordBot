@@ -1,7 +1,24 @@
-from discord import Embed, Member
+from discord import Embed, Member, Color
 from datetime import datetime, UTC
 
 from bot.database.schemas import InfractionsSchema, InfractionType
+
+
+async def generic_embed(title: str, description: str, color: Color, **kwargs) -> Embed:
+    embed = Embed(
+        title=title,
+        description=description,
+        colour=color,
+        timestamp=datetime.now(UTC),
+    )
+
+    if len(kwargs) > 25:
+        raise ValueError("Cannot add more than 25 fields to an embed.")
+
+    for name, value in kwargs.items():
+        embed.add_field(name=name.replace("_", " ").capitalize(), value=str(value), inline=False)
+
+    return embed
 
 
 async def format_infraction_embed(infraction: InfractionsSchema, member: Member, moderator: Member) -> Embed:

@@ -81,11 +81,12 @@ class Configuration(Cog):
                 default_timeout=default_timeout,
                 logs_moderation=logs_moderation.id if logs_moderation is not None else None,
                 logs_server=logs_server.id if logs_server is not None else None,
+                rules_message_id=None,
             )
 
             new_guild = await self.bot.db_guilds.create_guild(new_guild_schema)
 
-            guild_config_embed = await self.print_configuration(new_guild, new_guild_schema)
+            guild_config_embed = await self.print_configuration(ctx.guild, new_guild)
 
             await ctx.respond(embed=guild_config_embed)
         except Exception as e:
@@ -210,6 +211,12 @@ class Configuration(Cog):
             await ctx.defer(ephemeral=True)
 
             guild_config = await self.bot.db_guilds.get_guild_by_id(ctx.guild.id)
+
+            if guild_config is None:
+                await ctx.respond(
+                    f"Configuration du serveur introuvable, veuillez utiliser la commande `/config init` pour initialiser le bot sur le serveur {ctx.guild.name}."
+                )
+                return
 
             await ctx.respond(embed=await self.print_configuration(ctx.guild, guild_config))
         except Exception as e:
@@ -387,6 +394,9 @@ class Configuration(Cog):
     # Methode
     @staticmethod
     async def print_configuration(guild: Guild, guild_config: GuildUpdate | GuildSchema) -> Embed:
+        assert isinstance(guild_config, GuildSchema)
+        assert isinstance(guild, Guild)
+
         guild_config_embed = Embed(
             title=f"{guild_config.name} configuration",
             color=Color.dark_blue(),

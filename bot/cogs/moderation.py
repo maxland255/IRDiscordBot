@@ -66,6 +66,15 @@ class Moderation(Cog):
                 return
 
             if not await self.check_member_permissions(ctx, member):
+                await self.bot.logger.moderation.moderation_command_failed(
+                    ctx.guild.id,
+                    ctx.author,
+                    member,
+                    "warn",
+                    reason,
+                    failed_reason="hierarchy",
+                    error="I do not have permission to warn this member.",
+                )
                 return
 
             new_infraction = InfractionsCreate(
@@ -146,11 +155,29 @@ class Moderation(Cog):
                 return
 
             if not await self.check_member_permissions(ctx, member):
+                await self.bot.logger.moderation.moderation_command_failed(
+                    ctx.guild.id,
+                    ctx.author,
+                    member,
+                    "timeout",
+                    reason,
+                    failed_reason="hierarchy",
+                    error="I do not have permission to timeout this member.",
+                )
                 return
 
             gravity_level = await self.bot.db_gravity_levels.get_gravity_level_by_name(gravity)
 
             if gravity_level is None:
+                await self.bot.logger.moderation.moderation_command_failed(
+                    ctx.guild.id,
+                    ctx.author,
+                    member,
+                    "timeout",
+                    reason,
+                    failed_reason="code_error",
+                    error=f"Gravity level with name {gravity} not found.",
+                )
                 await ctx.respond(f"Gravity level with name {gravity} not found.")
                 return
 
@@ -160,6 +187,15 @@ class Moderation(Cog):
                                                              gravity_level=gravity_level)
 
             if timeout_until is None:
+                await self.bot.logger.moderation.moderation_command_failed(
+                    ctx.guild.id,
+                    ctx.author,
+                    member,
+                    "timeout",
+                    reason,
+                    failed_reason="code_error",
+                    error=f"An error occurred while calculating the timeout duration. (timeout_until is None)",
+                )
                 await ctx.respond(f"An error occurred while calculating the timeout duration.", ephemeral=True)
                 return
 
@@ -252,9 +288,3 @@ class Moderation(Cog):
             return False
 
         return True
-
-    # Listener / Event
-    # @Cog.listener()
-    # async def on_message(self, message):
-    #     print("Message from Moderation Cogs")
-    #     print(message.content)

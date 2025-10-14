@@ -5,9 +5,11 @@ from typing import Union
 
 async def get_channel(guild: Guild, channel_id: int | None) -> Union[
     VoiceChannel, StageChannel, TextChannel, ForumChannel, CategoryChannel, Thread, None]:
+    assert isinstance(guild, Guild)
+
     if channel_id is None:
         return None
-    
+
     channel = guild.get_channel(channel_id)
 
     if channel is not None:
