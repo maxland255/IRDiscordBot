@@ -62,6 +62,10 @@ class Configuration(Cog):
                 TextChannel,
                 channel_types=ChannelType.text,
             ),
+            rules_channel: Optional[TextChannel] = Option(
+                TextChannel,
+                channel_types=ChannelType.text,
+            ),
     ):
         try:
             await ctx.defer(ephemeral=True)
@@ -81,6 +85,7 @@ class Configuration(Cog):
                 default_timeout=default_timeout,
                 logs_moderation=logs_moderation.id if logs_moderation is not None else None,
                 logs_server=logs_server.id if logs_server is not None else None,
+                rules_channel_id=rules_channel.id if rules_channel is not None else None,
                 rules_message_id=None,
             )
 
@@ -121,6 +126,10 @@ class Configuration(Cog):
                 TextChannel,
                 channel_types=ChannelType.text,
             ),
+            rules_channel: Optional[TextChannel] = Option(
+                TextChannel,
+                channel_types=ChannelType.text,
+            ),
     ):
         try:
             await ctx.defer(ephemeral=True)
@@ -141,6 +150,9 @@ class Configuration(Cog):
 
             if logs_server is not None:
                 updated_guild.logs_server = logs_server.id
+
+            if rules_channel is not None:
+                updated_guild.rules_channel_id = rules_channel.id
 
             try:
                 updated_guild = await self.bot.db_guilds.update_guild(updated_guild)
@@ -173,6 +185,11 @@ class Configuration(Cog):
                 description="True = supprime la configuration",
                 default=False,
             ),
+            rules_channel: bool = Option(
+                bool,
+                description="True = supprime la configuration",
+                default=False,
+            ),
     ):
         try:
             await ctx.defer(ephemeral=True)
@@ -187,6 +204,9 @@ class Configuration(Cog):
 
             if logs_server:
                 updated_guild.logs_server = None
+
+            if rules_channel:
+                updated_guild.rules_channel_id = None
 
             try:
                 updated_guild = await self.bot.db_guilds.update_guild(updated_guild)
@@ -427,6 +447,14 @@ class Configuration(Cog):
         guild_config_embed.add_field(
             name="Logs server",
             value=logs_server.mention if logs_server is not None else "Not configured",
+            inline=False,
+        )
+
+        rules_channel = await get_channel(guild, guild_config.rules_channel_id)
+
+        guild_config_embed.add_field(
+            name="Rules channel",
+            value=rules_channel.mention if rules_channel is not None else "Not configured",
             inline=False,
         )
 

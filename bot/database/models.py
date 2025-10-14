@@ -2,7 +2,7 @@ from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boole
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from typing import Union
+from typing import Union, List
 from datetime import datetime
 
 from .schemas import InfractionType, InfractionResult, LogEntryType
@@ -27,7 +27,8 @@ class Guild(Base):
     logs_server: Mapped[Union[int, None]] = mapped_column(Integer, default=None)
 
     # Rules
-    rules_message_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
+    rules_channel_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
+    rules_message_id: Mapped[Union[List[int], None]] = mapped_column(JSON, nullable=True, default=None)
 
     deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
 
@@ -38,7 +39,8 @@ class GravityLevel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
 
     name: Mapped[str] = mapped_column(String(25), nullable=False, unique=True)
 
@@ -54,7 +56,8 @@ class Infractions(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
 
     user_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
     moderator_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
@@ -83,7 +86,8 @@ class LogEntry(Base):
     __table_args__ = {'sqlite_autoincrement': True}
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
 
     log_type: Mapped[LogEntryType] = mapped_column(Enum(LogEntryType), nullable=False, index=True)
 
@@ -93,3 +97,19 @@ class LogEntry(Base):
     details: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now)
+
+
+class GuildRules(Base):
+    __tablename__ = "guild_rules"
+    __table_args__ = {'sqlite_autoincrement': True}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    rules: Mapped[str] = mapped_column(String(1024), nullable=False)
+
+    rules_require_publish: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)

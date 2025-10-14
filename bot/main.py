@@ -9,7 +9,7 @@ from .cogs import ALL_COGS
 from .loggers import BotLogger
 
 from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityLevelRepository, \
-    SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository
+    SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository, SQLAlchemyGuildRulesRepository
 
 from discord import Bot, Intents
 
@@ -87,6 +87,10 @@ class IRBot(Bot):
     @property
     def db_logs_entries(self):
         return SQLAlchemyLogsEntryRepository(AsyncSession)
+
+    @property
+    def db_guild_rules(self):
+        return SQLAlchemyGuildRulesRepository(AsyncSession)
 
 
 bot: IRBot | None = None

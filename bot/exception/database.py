@@ -1,5 +1,5 @@
 from bot.database.schemas import GuildSchema, GuildUpdate, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate, \
-    InfractionsUpdate, InfractionsSchema, InfractionsCreate
+    InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate
 from typing import Union
 
 
@@ -37,3 +37,14 @@ class InfractionNotFound(Exception):
             return f"Infraction {self.infraction} not found"
 
         return f"Infraction {self.infraction.id} | {self.infraction.infraction_type.name} not found"
+
+
+class GuildRuleNotFound(Exception):
+    def __init__(self, guild_rule: Union[int, GuildRulesSchema, GuildRulesUpdate]) -> None:
+        self.guild_rule = guild_rule
+
+    def __str__(self) -> str:
+        if isinstance(self.guild_rule, int):
+            return f"Guild Rule {self.guild_rule} not found"
+
+        return f"Guild Rule {self.guild_rule.id} | {self.guild_rule.name} not found"
