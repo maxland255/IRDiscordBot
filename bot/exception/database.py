@@ -1,5 +1,6 @@
 from bot.database.schemas import GuildSchema, GuildUpdate, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate, \
-    InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate
+    InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate, RolePanelSchema, \
+    RolePanelUpdate, RoleOptionsUpdate
 from typing import Union
 
 
@@ -48,3 +49,25 @@ class GuildRuleNotFound(Exception):
             return f"Guild Rule {self.guild_rule} not found"
 
         return f"Guild Rule {self.guild_rule.id} | {self.guild_rule.name} not found"
+
+
+class RolesPanelNotFound(Exception):
+    def __init__(self, panel_id: Union[int, RolePanelSchema, RolePanelUpdate]) -> None:
+        self.panel_id = panel_id
+
+    def __str__(self) -> str:
+        if isinstance(self.panel_id, int):
+            return f"Roles Panel {self.panel_id} not found"
+
+        return f"Roles Panel {self.panel_id.id} | {self.panel_id.name} not found"
+
+
+class RoleOptionsNotFound(Exception):
+    def __init__(self, role_options: Union[int, RoleOptionsUpdate]) -> None:
+        self.role_options = role_options
+
+    def __str__(self) -> str:
+        if isinstance(self.role_options, int):
+            return f"Roles Panel {self.role_options} not found"
+
+        return f"Roles Panel {self.role_options.id} | {self.role_options.label} not found"

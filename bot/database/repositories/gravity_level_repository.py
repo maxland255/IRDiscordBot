@@ -104,7 +104,9 @@ class SQLAlchemyGravityLevelRepository(GravityLevelRepository):
         GravityLevelSchema, None]:
         async with self.session_factory() as session:
             result = await session.execute(
-                select(GravityLevel).where(GravityLevel.id == gravity_level_id)
+                select(GravityLevel)
+                .where(GravityLevel.id == gravity_level_id)
+                .where(GravityLevel.deleted_at.is_(None))
             )
 
             db_gravity_level = result.scalar_one_or_none()
@@ -121,7 +123,8 @@ class SQLAlchemyGravityLevelRepository(GravityLevelRepository):
         GravityLevelSchema, None]:
         async with self.session_factory() as session:
             result = await session.execute(
-                select(GravityLevel).where(GravityLevel.name == gravity_level_name)
+                select(GravityLevel)
+                .where(GravityLevel.name == gravity_level_name)
             )
 
             db_gravity_level = result.scalar_one_or_none()
@@ -148,7 +151,7 @@ class SQLAlchemyGravityLevelRepository(GravityLevelRepository):
         async with self.session_factory() as session:
             db_gravity_level = await session.get(GravityLevel, gravity_level.id)
 
-            if db_gravity_level is None:
+            if db_gravity_level is None or db_gravity_level.deleted_at is not None:
                 raise GravityLevelNotFound(gravity_level)
 
             update_data = gravity_level.model_dump(exclude_unset=True)
@@ -166,7 +169,7 @@ class SQLAlchemyGravityLevelRepository(GravityLevelRepository):
         async with self.session_factory() as session:
             db_gravity_level = await session.get(GravityLevel, gravity_level.id)
 
-            if db_gravity_level is None:
+            if db_gravity_level is None or db_gravity_level.deleted_at is not None:
                 raise GravityLevelNotFound(gravity_level)
 
             db_gravity_level.deleted_at = datetime.now(UTC)
@@ -178,7 +181,7 @@ class SQLAlchemyGravityLevelRepository(GravityLevelRepository):
         async with self.session_factory() as session:
             db_gravity_level = await session.get(GravityLevel, gravity_level_id)
 
-            if db_gravity_level is None:
+            if db_gravity_level is None or db_gravity_level.deleted_at is not None:
                 raise GravityLevelNotFound(gravity_level_id)
 
             db_gravity_level.deleted_at = datetime.now(UTC)

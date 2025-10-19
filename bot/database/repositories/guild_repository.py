@@ -86,7 +86,7 @@ class SQLAlchemyGuildRepository(GuildRepository):
         async with self.session_factory() as session:
             db_guild = await session.get(GuildModel, guild.id)
 
-            if db_guild is None:
+            if db_guild is None or db_guild.deleted_at is not None:
                 raise GuildNotFound(guild)
 
             update_data = guild.model_dump(exclude_unset=True)
@@ -104,7 +104,7 @@ class SQLAlchemyGuildRepository(GuildRepository):
         async with self.session_factory() as session:
             db_guild = await session.get(GuildModel, guild.id)
 
-            if db_guild is None:
+            if db_guild is None or db_guild.deleted_at is not None:
                 raise GuildNotFound(guild)
 
             db_guild.deleted_at = datetime.now(UTC)

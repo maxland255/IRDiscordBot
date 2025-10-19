@@ -45,7 +45,7 @@ def setup_logging():
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'file_fmt',
                 'filename': 'logs/bot.log',  # The logs are saved in the logs/ folder
-                'maxBytes': 1024 * 1024 * 5,  # The logs are split in 5 MB chunks
+                'maxBytes': 1024 * 1024,  # The logs are split in 5 MB chunks
                 'backupCount': 5,  # Save the last 5 logs files
                 'level': 'DEBUG',  # We write all logs to the file, even INFO and WARNING
                 'encoding': 'utf-8',

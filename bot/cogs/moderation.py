@@ -118,7 +118,6 @@ class Moderation(Cog):
         except Exception as e:
             logger.error("An error occurred while deferring the warn command: %s", e, exc_info=True)
             await ctx.respond(f"An error occurred while running the warn command", ephemeral=True)
-            return
 
     @moderator.command(
         name="timeout",

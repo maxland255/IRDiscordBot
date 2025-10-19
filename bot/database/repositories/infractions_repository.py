@@ -85,6 +85,7 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
             result = await session.execute(
                 select(Infractions)
                 .where(Infractions.guild_id == guild_id)
+                .where(Infractions.deleted_at.is_(None))
                 .options(selectinload(Infractions.gravity))
             )
 
@@ -98,6 +99,7 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
                 select(Infractions)
                 .where(Infractions.guild_id == guild_id)
                 .where(Infractions.user_id == user_id)
+                .where(Infractions.deleted_at.is_(None))
                 .options(selectinload(Infractions.gravity))
             )
 
@@ -142,7 +144,7 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
                 options=[selectinload(Infractions.gravity)],
             )
 
-            if db_infraction is None:
+            if db_infraction is None or db_infraction.deleted_at is not None:
                 raise InfractionNotFound(infraction)
 
             updated_data = infraction.model_dump(exclude_unset=True)
@@ -160,7 +162,7 @@ class SQLAlchemyInfractionsRepository(InfractionsRepository):
         async with self.session_factory() as session:
             db_infraction = await session.get(Infractions, infraction_id)
 
-            if db_infraction is None:
+            if db_infraction is None or db_infraction.deleted_at is not None:
                 raise InfractionNotFound(infraction_id)
 
             db_infraction.deleted_at = datetime.now(UTC)

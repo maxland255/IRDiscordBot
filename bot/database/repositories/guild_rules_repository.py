@@ -94,7 +94,7 @@ class SQLAlchemyGuildRulesRepository(GuildRulesRepository):
         async with self.session_factory() as session:
             db_guild_rule = await session.get(GuildRules, rule_id)
 
-            if db_guild_rule is None:
+            if db_guild_rule is None or db_guild_rule.deleted_at is not None:
                 if raise_if_not_found:
                     raise GuildRuleNotFound(rule_id)
                 else:
@@ -108,6 +108,7 @@ class SQLAlchemyGuildRulesRepository(GuildRulesRepository):
                 select(GuildRules)
                 .where(GuildRules.guild_id == guild_id)
                 .where(GuildRules.rules_require_publish == True)
+                .where(GuildRules.deleted_at.is_(None))
             )
 
             guild_rules = result.scalars().all()
@@ -128,7 +129,7 @@ class SQLAlchemyGuildRulesRepository(GuildRulesRepository):
         async with self.session_factory() as session:
             db_guild_rules = await session.get(GuildRules, guild_rules.id)
 
-            if db_guild_rules is None:
+            if db_guild_rules is None or db_guild_rules.deleted_at is not None:
                 raise GuildRuleNotFound(guild_rules)
 
             update_data = guild_rules.model_dump(exclude_unset=True)
@@ -146,7 +147,7 @@ class SQLAlchemyGuildRulesRepository(GuildRulesRepository):
         async with self.session_factory() as session:
             db_guild_rules = await session.get(GuildRules, guild_rules_id)
 
-            if db_guild_rules is None:
+            if db_guild_rules is None or db_guild_rules.deleted_at is not None:
                 return False
 
             db_guild_rules.deleted_at = datetime.now(UTC)

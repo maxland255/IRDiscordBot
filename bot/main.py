@@ -7,9 +7,11 @@ from .database.data.engine import engine, AsyncSession
 from .database.models import Base
 from .cogs import ALL_COGS
 from .loggers import BotLogger
+from .view.role_panel_view import RolePanelView
 
 from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityLevelRepository, \
-    SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository, SQLAlchemyGuildRulesRepository
+    SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository, SQLAlchemyGuildRulesRepository, \
+    SQLAlchemyRolePanelRepository, SQLAlchemyRoleOptionsRepository
 
 from discord import Bot, Intents
 
@@ -56,10 +58,29 @@ class IRBot(Bot):
 
         logger.info("Cogs loaded.")
 
+    async def load_all_role_panels(self):
+        """
+        Load all role panels from the database.
+        :return:
+        """
+        try:
+            panels = await self.db_role_panels.get_all_active_roles_panel()
+
+            for panel in panels:
+                role_panel_view = RolePanelView(
+                    panel=panel,
+                    bot=self,
+                )
+
+                self.add_view(role_panel_view)
+        except Exception as e:
+            logger.error(f"Error loading role panels: {e}")
+
     # Global events
-    @staticmethod
-    async def _on_ready():
+    async def _on_ready(self):
         logger.info(f"Bot is ready as {bot.user}")
+
+        await self.load_all_role_panels()
 
     # Property
     @property
@@ -91,6 +112,14 @@ class IRBot(Bot):
     @property
     def db_guild_rules(self):
         return SQLAlchemyGuildRulesRepository(AsyncSession)
+
+    @property
+    def db_role_panels(self):
+        return SQLAlchemyRolePanelRepository(AsyncSession)
+
+    @property
+    def db_role_options(self):
+        return SQLAlchemyRoleOptionsRepository(AsyncSession)
 
 
 bot: IRBot | None = None
