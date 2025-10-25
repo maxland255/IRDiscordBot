@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 from typing import Union, List
 from datetime import datetime
 
-from .schemas import InfractionType, InfractionResult, LogEntryType
+from .schemas import InfractionType, InfractionResult, LogEntryType, ReportStatus, ReportAction
 
 
 class Base(DeclarativeBase):
@@ -29,6 +29,9 @@ class Guild(Base):
     # Rules
     rules_channel_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
     rules_message_id: Mapped[Union[List[int], None]] = mapped_column(JSON, nullable=True, default=None)
+
+    # Moderation
+    report_channel_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
 
     # Tickets
 
@@ -158,3 +161,26 @@ class RolePanel(Base):
     deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
 
     options: Mapped[List[RoleOptions]] = relationship(RoleOptions, back_populates="panel")
+
+
+class Report(Base):
+    __tablename__ = "report"
+    __table_args__ = {'sqlite_autoincrement': True}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
+
+    reporter_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
+    report_reason: Mapped[str] = mapped_column(String(512), nullable=False)
+    offender_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
+
+    reported_channel_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
+    reported_message_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
+    log_message_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False, unique=True)
+
+    status: Mapped[ReportStatus] = mapped_column(Enum(ReportStatus), nullable=False, default=ReportStatus.OPEN)
+
+    handler_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, autoincrement=False, default=None)
+    handler_action: Mapped[Union[ReportAction, None]] = mapped_column(Enum(ReportAction), nullable=True, default=None)
+    handled_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)

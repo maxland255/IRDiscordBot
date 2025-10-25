@@ -8,10 +8,11 @@ from .database.models import Base
 from .cogs import ALL_COGS
 from .loggers import BotLogger
 from .view.role_panel_view import RolePanelView
+from .view.report_message.report_log_view import ReportLogView
 
 from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityLevelRepository, \
     SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository, SQLAlchemyGuildRulesRepository, \
-    SQLAlchemyRolePanelRepository, SQLAlchemyRoleOptionsRepository
+    SQLAlchemyRolePanelRepository, SQLAlchemyRoleOptionsRepository, SQLAlchemyReportRepository
 
 from discord import Bot, Intents
 
@@ -81,6 +82,8 @@ class IRBot(Bot):
         logger.info(f"Bot is ready as {bot.user}")
 
         await self.load_all_role_panels()
+        
+        self.add_view(ReportLogView(self))
 
     # Property
     @property
@@ -120,6 +123,10 @@ class IRBot(Bot):
     @property
     def db_role_options(self):
         return SQLAlchemyRoleOptionsRepository(AsyncSession)
+
+    @property
+    def db_reports(self):
+        return SQLAlchemyReportRepository(AsyncSession)
 
 
 bot: IRBot | None = None

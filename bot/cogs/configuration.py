@@ -56,15 +56,23 @@ class Configuration(Cog):
             ),
             logs_moderation: Optional[TextChannel] = Option(
                 TextChannel,
-                channel_types=ChannelType.text,
+                required=False,
+                channel_types=[ChannelType.text],
             ),
             logs_server: Optional[TextChannel] = Option(
                 TextChannel,
-                channel_types=ChannelType.text,
+                required=False,
+                channel_types=[ChannelType.text],
             ),
             rules_channel: Optional[TextChannel] = Option(
                 TextChannel,
-                channel_types=ChannelType.text,
+                required=False,
+                channel_types=[ChannelType.text],
+            ),
+            report_channel: Optional[TextChannel] = Option(
+                TextChannel,
+                required=False,
+                channel_types=[ChannelType.text],
             ),
     ):
         try:
@@ -86,6 +94,7 @@ class Configuration(Cog):
                 logs_moderation=logs_moderation.id if logs_moderation is not None else None,
                 logs_server=logs_server.id if logs_server is not None else None,
                 rules_channel_id=rules_channel.id if rules_channel is not None else None,
+                report_channel_id=report_channel.id if report_channel is not None else None,
                 rules_message_id=None,
             )
 
@@ -120,15 +129,23 @@ class Configuration(Cog):
             ),
             logs_moderation: Optional[TextChannel] = Option(
                 TextChannel,
-                channel_types=ChannelType.text,
+                required=False,
+                channel_types=[ChannelType.text],
             ),
             logs_server: Optional[TextChannel] = Option(
                 TextChannel,
-                channel_types=ChannelType.text,
+                required=False,
+                channel_types=[ChannelType.text],
             ),
             rules_channel: Optional[TextChannel] = Option(
                 TextChannel,
-                channel_types=ChannelType.text,
+                required=False,
+                channel_types=[ChannelType.text],
+            ),
+            report_channel: Optional[TextChannel] = Option(
+                TextChannel,
+                required=False,
+                channel_types=[ChannelType.text],
             ),
     ):
         try:
@@ -153,6 +170,9 @@ class Configuration(Cog):
 
             if rules_channel is not None:
                 updated_guild.rules_channel_id = rules_channel.id
+
+            if report_channel is not None:
+                updated_guild.report_channel_id = report_channel.id
 
             try:
                 updated_guild = await self.bot.db_guilds.update_guild(updated_guild)
@@ -190,6 +210,10 @@ class Configuration(Cog):
                 description="True = supprime la configuration",
                 default=False,
             ),
+            report_channel: bool = Option(
+                bool,
+                default=False,
+            ),
     ):
         try:
             await ctx.defer(ephemeral=True)
@@ -207,6 +231,9 @@ class Configuration(Cog):
 
             if rules_channel:
                 updated_guild.rules_channel_id = None
+
+            if report_channel:
+                updated_guild.report_channel_id = None
 
             try:
                 updated_guild = await self.bot.db_guilds.update_guild(updated_guild)
@@ -455,6 +482,14 @@ class Configuration(Cog):
         guild_config_embed.add_field(
             name="Rules channel",
             value=rules_channel.mention if rules_channel is not None else "Not configured",
+            inline=False,
+        )
+
+        report_channel = await get_channel(guild, guild_config.report_channel_id)
+
+        guild_config_embed.add_field(
+            name="Report channel",
+            value=report_channel.mention if report_channel is not None else "Not configured",
             inline=False,
         )
 

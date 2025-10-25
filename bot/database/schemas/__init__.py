@@ -5,6 +5,7 @@ from .log_entry import LogEntryType, LogEntryCreate, LogEntrySchema
 from .guild_rules import GuildRulesCreate, GuildRulesSchema, GuildRulesUpdate
 from .role_panel import RolePanelCreate, RolePanelSchema, RolePanelUpdate
 from .role_options import RoleOptionsCreate, RoleOptionsSchema, RoleOptionsUpdate
+from .report import ReportStatus, ReportAction, ReportCreate, ReportSchema, ReportUpdate
 
 __all__ = [
     "GuildSchema",
@@ -29,4 +30,9 @@ __all__ = [
     "RoleOptionsCreate",
     "RoleOptionsSchema",
     "RoleOptionsUpdate",
+    "ReportStatus",
+    "ReportAction",
+    "ReportCreate",
+    "ReportSchema",
+    "ReportUpdate",
 ]

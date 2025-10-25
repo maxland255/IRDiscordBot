@@ -5,6 +5,7 @@ from .logs_entry_repository import LogsEntryRepository, SQLAlchemyLogsEntryRepos
 from .guild_rules_repository import GuildRulesRepository, SQLAlchemyGuildRulesRepository
 from .role_panel_repository import RolePanelRepository, SQLAlchemyRolePanelRepository
 from .role_options_repository import RoleOptionsRepository, SQLAlchemyRoleOptionsRepository
+from .report_repository import ReportRepository, SQLAlchemyReportRepository
 
 __all__ = [
     "GuildRepository",
@@ -21,4 +22,6 @@ __all__ = [
     "SQLAlchemyRolePanelRepository",
     "RoleOptionsRepository",
     "SQLAlchemyRoleOptionsRepository",
+    "ReportRepository",
+    "SQLAlchemyReportRepository",
 ]

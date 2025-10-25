@@ -1,5 +1,4 @@
 import logging
-from tkinter.font import names
 
 from typing import TYPE_CHECKING
 from datetime import datetime, UTC

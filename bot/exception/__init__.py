@@ -1,5 +1,5 @@
 from .database import GuildNotFound, GravityLevelNotFound, InfractionNotFound, GuildRuleNotFound, RolesPanelNotFound, \
-    RoleOptionsNotFound
+    RoleOptionsNotFound, ReportNotFound
 
 __all__ = [
     "GuildNotFound",
@@ -8,4 +8,5 @@ __all__ = [
     "GuildRuleNotFound",
     "RolesPanelNotFound",
     "RoleOptionsNotFound",
+    "ReportNotFound",
 ]

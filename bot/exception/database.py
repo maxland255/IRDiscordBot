@@ -1,6 +1,6 @@
 from bot.database.schemas import GuildSchema, GuildUpdate, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate, \
     InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate, RolePanelSchema, \
-    RolePanelUpdate, RoleOptionsUpdate
+    RolePanelUpdate, RoleOptionsUpdate, ReportSchema
 from typing import Union
 
 
@@ -71,3 +71,14 @@ class RoleOptionsNotFound(Exception):
             return f"Roles Panel {self.role_options} not found"
 
         return f"Roles Panel {self.role_options.id} | {self.role_options.label} not found"
+
+
+class ReportNotFound(Exception):
+    def __init__(self, report: Union[int, ReportSchema]) -> None:
+        self.report = report
+
+    def __str__(self) -> str:
+        if isinstance(self.report, int):
+            return f"Report {self.report} not found"
+
+        return f"Report {self.report.id} not found"
