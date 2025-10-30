@@ -4,13 +4,15 @@ from typing import TYPE_CHECKING
 from datetime import datetime, UTC
 
 from discord import Cog, SlashCommandGroup, InteractionContextType, Permissions, ApplicationContext, Option, Embed, \
-    Color, TextChannel
+    Color, TextChannel, EmbedField
 
 from bot.database.schemas import RolePanelCreate, RolePanelSchema, RoleOptionsSchema, RolePanelUpdate
-from bot.view.panel_list_view import RolePanelListView
 from bot.exception import RolesPanelNotFound
 from bot.view.panel_option_view import PanelOptionView
 from bot.view.role_panel_view import RolePanelView
+from bot.utils.pagination_view import PaginationView
+
+from .cogs_base import CogsBase
 
 if TYPE_CHECKING:
     from bot.main import IRBot
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class Roles(Cog):
+class Roles(Cog, CogsBase):
     def __init__(self, bot: "IRBot"):
         self.bot = bot
 
@@ -113,13 +115,17 @@ class Roles(Cog):
                 await ctx.respond("No roles panels found in this guild.", ephemeral=True)
                 return
 
-            role_list_panel_view = RolePanelListView(
-                panels=role_panels,
+            role_list_panel_view = PaginationView(
+                data=role_panels,
+                title="Roles Panel List",
+                format_item_func=lambda panel: EmbedField(
+                    name=panel.name,
+                    value=f"ID: {panel.id}\nTitle: {panel.title}",
+                    inline=False,
+                ),
+                mode="fields",
+                embed_color=Color.blue(),
             )
-
-            role_list_panel_view.previous_button.disabled = True
-            if len(role_panels) <= role_list_panel_view.item_per_page:
-                role_list_panel_view.next_button.disabled = True
 
             await ctx.respond(
                 embed=role_list_panel_view.create_page_embed(),

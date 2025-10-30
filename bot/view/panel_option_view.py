@@ -3,8 +3,8 @@ import logging
 from typing import TYPE_CHECKING
 from datetime import datetime, UTC
 
-from discord import Role, Interaction, ComponentType, Color, Embed
-from discord.ui import Modal, InputText, Select
+from discord import Role, Interaction, Color, Embed
+from discord.ui import DesignerModal, InputText, RoleSelect, Label
 
 from bot.database.schemas import RoleOptionsCreate, RoleOptionsSchema, RoleOptionsUpdate
 
@@ -14,45 +14,59 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PanelOptionView(Modal):
+class PanelOptionView(DesignerModal):
     def __init__(self, panel_id: int, bot: "IRBot", option: RoleOptionsSchema | None = None):
         super().__init__(title="Panel Option Configuration")
         self.panel_id = panel_id
         self.bot = bot
         self.option = option
 
-        self.role_select = Select(
-            select_type=ComponentType.role_select,
-            label="Select a Role",
+        self.role_select = RoleSelect(
             placeholder="Choose a role for this option",
             required=self.option is None,
         )
+        self.role_label = Label(
+            label="Select a Role",
+            item=self.role_select,
+        )
+
         self.label_input = InputText(
-            label="Label",
             placeholder="Enter the label for the option",
             max_length=100,
             value=self.option.label if self.option is not None else None,
         )
+        self.label_label = Label(
+            label="Label",
+            item=self.label_input,
+        )
+
         self.description_input = InputText(
-            label="Description",
             placeholder="Enter the description for the option",
             required=False,
             max_length=100,
             value=self.option.description if self.option is not None and self.option.description else "",
         )
+        self.description_label = Label(
+            label="Description",
+            item=self.description_input,
+        )
+
         self.emoji_input = InputText(
-            label="Emoji",
             placeholder="Enter the emoji for the option",
             required=False,
             max_length=2,
             value=self.option.emoji if self.option is not None and self.option.emoji else "",
         )
+        self.emoji_label = Label(
+            label="Emoji",
+            item=self.emoji_input,
+        )
 
         if self.option is None:
-            self.add_item(self.role_select)
-        self.add_item(self.label_input)
-        self.add_item(self.description_input)
-        self.add_item(self.emoji_input)
+            self.add_item(self.role_label)
+        self.add_item(self.label_label)
+        self.add_item(self.description_label)
+        self.add_item(self.emoji_label)
 
     async def callback(self, interaction: Interaction):
         try:

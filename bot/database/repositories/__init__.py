@@ -6,6 +6,10 @@ from .guild_rules_repository import GuildRulesRepository, SQLAlchemyGuildRulesRe
 from .role_panel_repository import RolePanelRepository, SQLAlchemyRolePanelRepository
 from .role_options_repository import RoleOptionsRepository, SQLAlchemyRoleOptionsRepository
 from .report_repository import ReportRepository, SQLAlchemyReportRepository
+from .ticket_type_repository import TicketTypeRepository, SQLAlchemyTicketTypeRepository
+from .ticket_panel_repository import TicketPanelRepository, SQLAlchemyTicketPanelRepository
+from .tickets_repository import TicketsRepository, SQLAlchemyTicketsRepository
+from .ticket_message_repository import TicketMessageRepository, SQLAlchemyTicketMessageRepository
 
 __all__ = [
     "GuildRepository",
@@ -24,4 +28,12 @@ __all__ = [
     "SQLAlchemyRoleOptionsRepository",
     "ReportRepository",
     "SQLAlchemyReportRepository",
+    "TicketTypeRepository",
+    "SQLAlchemyTicketTypeRepository",
+    "TicketPanelRepository",
+    "SQLAlchemyTicketPanelRepository",
+    "TicketsRepository",
+    "SQLAlchemyTicketsRepository",
+    "TicketMessageRepository",
+    "SQLAlchemyTicketMessageRepository",
 ]

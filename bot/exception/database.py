@@ -1,6 +1,7 @@
 from bot.database.schemas import GuildSchema, GuildUpdate, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate, \
     InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate, RolePanelSchema, \
-    RolePanelUpdate, RoleOptionsUpdate, ReportSchema
+    RolePanelUpdate, RoleOptionsUpdate, ReportSchema, TicketTypeUpdate, TicketPanelUpdate, TicketsUpdate, \
+    TicketMessageUpdate
 from typing import Union
 
 
@@ -82,3 +83,47 @@ class ReportNotFound(Exception):
             return f"Report {self.report} not found"
 
         return f"Report {self.report.id} not found"
+
+
+class TicketTypeNotFound(Exception):
+    def __init__(self, ticket_type: Union[int, TicketTypeUpdate]) -> None:
+        self.ticket_type = ticket_type
+
+    def __str__(self) -> str:
+        if isinstance(self.ticket_type, int):
+            return f"Ticket Type {self.ticket_type} not found"
+
+        return f"Ticket Type {self.ticket_type.id} | {self.ticket_type.name} not found"
+
+
+class TicketPanelNotFound(Exception):
+    def __init__(self, ticket_panel: Union[int, TicketPanelUpdate]) -> None:
+        self.ticket_panel = ticket_panel
+
+    def __str__(self) -> str:
+        if isinstance(self.ticket_panel, int):
+            return f"Ticket Panel {self.ticket_panel} not found"
+
+        return f"Ticket Panel {self.ticket_panel.id} not found"
+
+
+class TicketsNotFound(Exception):
+    def __init__(self, tickets: Union[int, TicketsUpdate]) -> None:
+        self.tickets = tickets
+
+    def __str__(self) -> str:
+        if isinstance(self.tickets, int):
+            return f"Ticket {self.tickets} not found"
+
+        return f"Ticket {self.tickets.id} not found"
+
+
+class TicketMessageNotFound(Exception):
+    def __init__(self, ticket_message: Union[int, TicketMessageUpdate]) -> None:
+        self.ticket_message = ticket_message
+
+    def __str__(self) -> str:
+        if isinstance(self.ticket_message, int):
+            return f"Ticket Message {self.ticket_message} not found"
+
+        return f"Ticket Message {self.ticket_message.id} not found"

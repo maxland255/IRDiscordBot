@@ -13,6 +13,8 @@ from bot.utils.bot_extensions import get_bot_top_role
 from bot.utils.get_member import get_member
 from bot.utils.calculate_timeout import calculate_timeout_duration
 
+from .cogs_base import CogsBase
+
 if TYPE_CHECKING:
     from bot.main import IRBot
 
@@ -26,7 +28,7 @@ async def get_gravity_levels(ctx: AutocompleteContext) -> list[str]:
     return [g.name for g in gravity_levels]
 
 
-class Moderation(Cog):
+class Moderation(Cog, CogsBase):
     def __init__(self, bot: "IRBot"):
         self.bot = bot
 

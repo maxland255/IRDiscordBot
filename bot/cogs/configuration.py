@@ -10,11 +10,13 @@ from typing import TYPE_CHECKING, Optional
 
 from bot.exception import GuildNotFound, GravityLevelNotFound
 
+from .cogs_base import CogsBase
+
 if TYPE_CHECKING:
     from bot.main import IRBot
 
 
-class Configuration(Cog):
+class Configuration(Cog, CogsBase):
     def __init__(self, bot: "IRBot"):
         self.bot = bot
 

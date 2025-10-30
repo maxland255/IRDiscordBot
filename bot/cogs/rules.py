@@ -11,6 +11,8 @@ from bot.database.schemas import GuildSchema, GuildUpdate, GuildRulesCreate, Gui
 from bot.exception import GuildRuleNotFound
 from bot.utils.get_channel import get_channel
 
+from .cogs_base import CogsBase
+
 if TYPE_CHECKING:
     from bot.main import IRBot
 
@@ -26,7 +28,7 @@ class DiscordRules(BaseModel):
     values: list[str] | None
 
 
-class Rules(Cog):
+class Rules(Cog, CogsBase):
     def __init__(self, bot: "IRBot"):
         self.bot = bot
 

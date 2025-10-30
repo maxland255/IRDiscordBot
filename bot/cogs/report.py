@@ -6,13 +6,15 @@ from discord import Cog, SlashCommandGroup, InteractionContextType, ApplicationC
 
 from bot.view.report_message.report_message_view import ReportMessageView
 
+from .cogs_base import CogsBase
+
 if TYPE_CHECKING:
     from bot.main import IRBot
 
 logger = logging.getLogger(__name__)
 
 
-class Report(Cog):
+class Report(Cog, CogsBase):
     def __init__(self, bot: "IRBot"):
         self.bot = bot
 

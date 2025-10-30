@@ -5,6 +5,9 @@ from .configuration import Configuration
 from .rules import Rules
 from .roles import Roles
 from .report import Report
+from .tickets import Tickets
+from .tickets_config import TicketsConfig
+from .tickets_admin import TicketsAdmin
 
 ALL_COGS: dict[str, Type[Any]] = {
     "moderation": Moderation,
@@ -12,4 +15,7 @@ ALL_COGS: dict[str, Type[Any]] = {
     "rules": Rules,
     "roles": Roles,
     "report": Report,
+    "tickets": Tickets,
+    "tickets_config": TicketsConfig,
+    "tickets_admin": TicketsAdmin,
 }
