@@ -1,7 +1,7 @@
 from bot.database.schemas import GuildSchema, GuildUpdate, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate, \
     InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate, RolePanelSchema, \
     RolePanelUpdate, RoleOptionsUpdate, ReportSchema, TicketTypeUpdate, TicketPanelUpdate, TicketsUpdate, \
-    TicketMessageUpdate
+    TicketMessageUpdate, VerificationsUpdate
 from typing import Union
 
 
@@ -127,3 +127,20 @@ class TicketMessageNotFound(Exception):
             return f"Ticket Message {self.ticket_message} not found"
 
         return f"Ticket Message {self.ticket_message.id} not found"
+
+
+class VerificationNotFound(Exception):
+    def __init__(self, verification: Union[int, str, VerificationsUpdate]) -> None:
+        self.verification = verification
+
+    def __str__(self) -> str:
+        if isinstance(self.verification, int) or isinstance(self.verification, str):
+            return f"Verification {self.verification} not found"
+
+        return f"Verification {self.verification.id} not found"
+
+
+class VerificationRateLimitError(Exception):
+    def __init__(self, message, retry_after: float = None):
+        super().__init__(message)
+        self.retry_after = retry_after

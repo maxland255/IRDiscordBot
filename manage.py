@@ -31,7 +31,7 @@ def _print_help():
     print("Commandes disponibles:")
     print("  setup          : Configure l'environnement de développement initial.")
     print("  run            : Lance le bot localement (requiert 'setup' au préalable).")
-    print("  docker-build   : Construit l'image Docker de production sans la lancer.")  # NOUVEAU
+    print("  docker-build   : Construit l'image Docker de production sans la lancer.")
     print("  docker-dev     : Lance le bot en mode développement avec Docker (rechargement auto).")
     print("  docker-prod    : Déploie le bot en production avec Docker.")
     print("  docker-down    : Arrête les conteneurs Docker lancés par ce script.")
@@ -97,7 +97,7 @@ def command_run_local():
         print(f"⚠️ {DEV_ENV_FILE} n'existe pas dans le fichier.")
         raise FileNotFoundError(DEV_ENV_FILE)
     print("🚀 Lancement du bot en local...")
-    os.environ["ENV"] = "dev"
+    os.environ["APP_ENV"] = "dev"
     python_venv = _get_python_executable()
     _run_command([python_venv, "-m", "bot.main"])
 

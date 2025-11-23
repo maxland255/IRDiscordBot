@@ -3,6 +3,8 @@ import pathlib
 import logging
 import logging.config
 
+from bot.core.config import get_settings
+
 
 def setup_logging():
     """Configure logging for the bot"""
@@ -38,7 +40,7 @@ def setup_logging():
             'console': {
                 'class': 'logging.StreamHandler',
                 'formatter': 'console_fmt',
-                'level': 'INFO',  # Only show INFO and higher in the console
+                'level': get_settings().LOG_LEVEL,
                 'stream': sys.stdout,
             },
             'file': {
@@ -55,7 +57,7 @@ def setup_logging():
         # Loggers: define the source of logs
         'loggers': {
             # The principal logger of the bot
-            'my_bot': {
+            'ir_bot': {
                 'handlers': ['console', 'file'],
                 'level': 'DEBUG',
                 'propagate': False,  # Don't propagate to the root logger

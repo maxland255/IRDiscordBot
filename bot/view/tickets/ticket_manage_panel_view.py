@@ -1,17 +1,17 @@
 import logging
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from datetime import datetime, UTC
 
-from discord import ButtonStyle, Interaction, Embed, Color, Member, TextChannel
+from discord import ButtonStyle, Interaction, Embed, Color, Member
 from discord.ui import DesignerView, ActionRow
 
-from bot.cogs.tickets import Tickets
 from bot.view.components import ActionButton
-from bot.database.schemas import TicketTypeSchema, TicketsUpdate, TicketStatus
+from bot.database.schemas import TicketTypeSchema, TicketsUpdate
 from bot.utils.get_role import get_role
 
 if TYPE_CHECKING:
+    from bot.cogs.tickets import Tickets
     from bot.main import IRBot
 
 logger = logging.getLogger(__name__)
@@ -45,57 +45,12 @@ class TicketManagePanelView(DesignerView):
 
     async def _on_close_ticket(self, interaction: Interaction):
         try:
-            await interaction.response.defer(ephemeral=True)
-
-            ticket = await self.bot.db_tickets.get_ticket_by_channel_id(interaction.channel_id)
-
-            if ticket is None:
-                await interaction.response.send_message(
-                    "Unable to close ticket: Ticket not found.",
-                    ephemeral=True,
-                )
-                return
-
-            ticket_type = ticket.ticket_type
-
-            moderator_role = await get_role(interaction.guild, ticket_type.moderator_role_id)
-
-            if moderator_role is None:
-                await interaction.response.send_message(
-                    "Unable to close ticket: Moderator role not found.",
-                    ephemeral=True,
-                )
-                return
-
-            if ticket.member_id != interaction.user.id and moderator_role not in interaction.user.roles and not interaction.user.guild_permissions.administrator:
-                await interaction.response.send_message(
-                    "You do not have permission to close this ticket.",
-                    ephemeral=True,
-                )
-                return
-
-            channel: TextChannel = interaction.channel
-
-            # Remove the ticket channel from the opened tickets set
-            tickets_cog: Tickets | None = self.bot.get_cog("Tickets")
+            tickets_cog: Optional["Tickets"] = self.bot.get_cog("Tickets")
 
             if tickets_cog is None:
-                logger.error("Failed to load tickets cog")
-            else:
-                tickets_cog.remove_ticket_channel_id(channel.id)
+                raise RuntimeError("Tickets cog is not loaded.")
 
-            update_ticket = TicketsUpdate(
-                id=ticket.id,
-                status=TicketStatus.CLOSED,
-                channel_id=None,
-                panel_message_id=None,
-            )
-
-            await self.bot.db_tickets.update_ticket(update_ticket)
-
-            await channel.delete(
-                reason=f"Ticket ID {ticket.id} closed by {interaction.user.display_name}",
-            )
+            await tickets_cog.close_ticket_channel(interaction)
         except Exception as e:
             logger.error("Failed to close ticket", exc_info=e)
             await interaction.followup.send(

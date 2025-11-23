@@ -1,17 +1,23 @@
 import logging
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 from datetime import datetime, UTC
 
 from discord import Cog, SlashCommandGroup, InteractionContextType, Message, StickerItem, RawMessageDeleteEvent, \
-    RawMessageUpdateEvent, RawBulkMessageDeleteEvent, ApplicationContext, Member, Option, Role
+    RawMessageUpdateEvent, RawBulkMessageDeleteEvent, ApplicationContext, Member, Option, Role, Interaction, \
+    TextChannel, CategoryChannel, Guild, Embed
+from discord.utils import get_or_fetch
+from discord.ui import DesignerView
 
 from .cogs_base import CogsBase
 
 from bot.exception import NonCriticalCogInitializationError
-from bot.database.schemas import TicketMessageCreate, TicketMessageUpdate, TicketStatus, TicketsSchema, TicketsUpdate
+from bot.database.schemas import TicketMessageCreate, TicketMessageUpdate, TicketStatus, TicketsSchema, TicketsUpdate, \
+    TicketTypeSchema, TicketsCreate
 from bot.utils.get_role import get_role
-from bot.utils.ticket_permissions import get_externe_member_permissions, get_moderator_permissions
+from bot.utils.ticket_permissions import get_externe_member_permissions, get_moderator_permissions, \
+    get_member_permissions, get_default_role_permissions
+from bot.view.tickets.ticket_manage_panel_view import TicketManagePanelView
 
 if TYPE_CHECKING:
     from bot.main import IRBot
@@ -58,6 +64,158 @@ class Tickets(Cog, CogsBase):
 
     def remove_ticket_channel_id(self, channel_id: int) -> None:
         self._all_channel_tickets.remove(channel_id)
+
+    # Manage ticket method
+
+    async def create_ticket_from_interaction(self, interaction: Interaction, ticket_type: TicketTypeSchema,
+                                             reason: str | None = None) -> TextChannel | None:
+        result = await self.create_new_ticket(
+            ticket_type=ticket_type,
+            member=interaction.user,
+            guild=interaction.guild,
+            ticket_management_view=TicketManagePanelView,
+            ticket_management_embed=TicketManagePanelView.create_panel_embed(ticket_type, author=interaction.user,
+                                                                             reason=reason),
+        )
+
+        return result[0]
+
+    async def create_new_ticket(self, ticket_type: TicketTypeSchema | int, member: Member, guild: Guild,
+                                ticket_management_view: Callable[["IRBot"], DesignerView],
+                                ticket_management_embed: Embed) -> tuple[
+        TextChannel, TicketsSchema]:
+
+        ticket_type = await self.bot.db_ticket_type.get_ticket_type_by_id(
+            ticket_type.id if isinstance(ticket_type, TicketTypeSchema) else ticket_type)
+
+        if ticket_type is None or ticket_type.deleted_at is not None:
+            raise ValueError("Ticket type does not exist or is inactive.")
+
+        existing_ticket = await self.bot.db_tickets.find_open_ticket_by_member_id_guild_id_and_type_id(guild.id,
+                                                                                                       member.id,
+                                                                                                       ticket_type.id)
+
+        if existing_ticket:
+            raise RuntimeError(
+                "You already have an open ticket of this type. Please close your existing ticket before opening a new one.",
+            )
+
+        new_ticket = TicketsCreate(
+            ticket_type_id=ticket_type.id,
+            member_id=member.id,
+        )
+
+        try:
+            ticket = await self.bot.db_tickets.create_ticket(new_ticket)
+        except Exception as e:
+            logger.exception("Failed to create ticket", exc_info=e)
+            raise RuntimeError("An error occurred while creating the ticket.") from e
+
+        ticket_category = await get_or_fetch(guild, CategoryChannel, ticket_type.ticket_channel_category_id)
+
+        if ticket_category is None:
+            raise ValueError("Ticket category channel not found.")
+
+        moderator_role = await get_role(guild, ticket_type.moderator_role_id)
+
+        if moderator_role is None:
+            raise ValueError("Moderator role not found.")
+
+        ticket_channel = await ticket_category.create_text_channel(
+            name=f"{ticket_type.name} - {ticket.id}",
+            overwrites={
+                guild.default_role: get_default_role_permissions(),
+                member: get_member_permissions(),
+                moderator_role: get_moderator_permissions(),
+            },
+            reason=f"Creating ticket channel for ticket ID {ticket.id} ({member.display_name})",
+        )
+
+        # Add the ticket channel ID to the in-memory set
+        self.add_ticket_channel_id(ticket_channel.id)
+
+        ticket_management_panel_message = await ticket_channel.send(
+            embed=ticket_management_embed,
+            view=ticket_management_view(self.bot),
+        )
+
+        try:
+            await ticket_management_panel_message.pin()
+        except Exception as e:
+            logger.warning(f"Failed to pin ticket panel message in channel {ticket_channel.id}: {e}", exc_info=e)
+
+        update_ticket = TicketsUpdate(
+            id=ticket.id,
+            channel_id=ticket_channel.id,
+            panel_message_id=ticket_management_panel_message.id,
+        )
+
+        tickets = await self.bot.db_tickets.update_ticket(update_ticket)
+
+        return ticket_channel, tickets
+
+    async def close_ticket_channel(self, interaction: Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        ticket = await self.bot.db_tickets.get_ticket_by_channel_id(interaction.channel_id)
+
+        if ticket is None:
+            await interaction.response.send_message(
+                "Unable to close ticket: Ticket not found.",
+                ephemeral=True,
+            )
+            return
+
+        ticket_type = ticket.ticket_type
+
+        moderator_role = await get_role(interaction.guild, ticket_type.moderator_role_id)
+
+        if moderator_role is None:
+            await interaction.response.send_message(
+                "Unable to close ticket: Moderator role not found.",
+                ephemeral=True,
+            )
+            return
+
+        if ticket.member_id != interaction.user.id and moderator_role not in interaction.user.roles and not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "You do not have permission to close this ticket.",
+                ephemeral=True,
+            )
+            return
+
+        await self.close_ticket(interaction.guild, ticket)
+
+    async def close_ticket(self, guild: Guild, ticket: TicketsSchema, channel: TextChannel | None = None):
+        if channel is None:
+            channel_id = ticket.channel_id
+
+            if channel_id is None:
+                raise ValueError("Channel id is None.")
+
+            channel: TextChannel | None = await guild.get_or_fetch(TextChannel, channel_id)
+
+            if channel is None:
+                raise ValueError("Channel not found.")
+
+        if ticket.channel_id != channel.id:
+            raise ValueError("Ticket channel ID does not match the provided channel ID.")
+
+        # Remove the ticket channel from the opened tickets set
+        self.remove_ticket_channel_id(channel.id)
+
+        update_ticket = TicketsUpdate(
+            id=ticket.id,
+            status=TicketStatus.CLOSED,
+            channel_id=None,
+            panel_message_id=None,
+        )
+
+        await self.bot.db_tickets.update_ticket(update_ticket)
+
+        await channel.delete(
+            reason=f"Ticket ID {ticket.id} closed by the internal system ({self.bot.user.display_name})",
+        )
 
     # Event listeners
 

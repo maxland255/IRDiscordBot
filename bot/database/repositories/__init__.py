@@ -10,6 +10,7 @@ from .ticket_type_repository import TicketTypeRepository, SQLAlchemyTicketTypeRe
 from .ticket_panel_repository import TicketPanelRepository, SQLAlchemyTicketPanelRepository
 from .tickets_repository import TicketsRepository, SQLAlchemyTicketsRepository
 from .ticket_message_repository import TicketMessageRepository, SQLAlchemyTicketMessageRepository
+from .verifications_repository import VerificationsRepository, SQLAlchemyVerificationsRepository
 
 __all__ = [
     "GuildRepository",
@@ -36,4 +37,6 @@ __all__ = [
     "SQLAlchemyTicketsRepository",
     "TicketMessageRepository",
     "SQLAlchemyTicketMessageRepository",
+    "VerificationsRepository",
+    "SQLAlchemyVerificationsRepository",
 ]

@@ -110,7 +110,7 @@ class TicketsConfig(Cog, CogsBase):
                 title="Ticket types",
                 format_item_func=lambda item: EmbedField(
                     name=item.name,
-                    value=f"ID: {item.id}\nDescription: {item.description[:100]}{"..." if len(item.description) >= 100 else ""}\nEnabled: {"Yes" if item.enabled else "No"}",
+                    value=f"ID: {item.id}\nDescription: {item.description[:100]}{"..." if len(item.description) >= 100 else ""}\nEnabled: {"Yes" if item.enabled else "No"}\nSystem: {"Yes" if item.is_system else "No"}",
                 ),
                 embed_color=Color.blurple(),
             )
@@ -176,6 +176,10 @@ class TicketsConfig(Cog, CogsBase):
                 await ctx.respond("Ticket type not found.", ephemeral=True)
                 return
 
+            if ticket_type.is_system:
+                await ctx.respond("System ticket types cannot be edited.", ephemeral=True)
+                return
+
             ticket_type_config_view = TicketTypeConfigView(self.bot, ticket_type=ticket_type)
 
             await ctx.response.send_modal(ticket_type_config_view)
@@ -203,6 +207,16 @@ class TicketsConfig(Cog, CogsBase):
     ):
         try:
             await ctx.defer(ephemeral=True)
+
+            ticket_type = await self.bot.db_ticket_type.get_ticket_type_by_id(ticket_type_id)
+
+            if not ticket_type or ticket_type.deleted_at is not None:
+                await ctx.respond("Ticket type not found.", ephemeral=True)
+                return
+
+            if ticket_type.is_system:
+                await ctx.respond("System ticket types cannot be edited.", ephemeral=True)
+                return
 
             update_ticket_type = TicketTypeUpdate(
                 id=ticket_type_id,
@@ -247,6 +261,10 @@ class TicketsConfig(Cog, CogsBase):
                 await ctx.respond("Ticket type not found.", ephemeral=True)
                 return
 
+            if ticket_type.is_system:
+                await ctx.respond("System ticket types cannot be deleted.", ephemeral=True)
+                return
+
             result = await self.bot.db_ticket_type.delete_ticket_type(ticket_type)
 
             if result:
@@ -284,6 +302,10 @@ class TicketsConfig(Cog, CogsBase):
 
             if ticket_type is None or ticket_type.deleted_at is not None:
                 await ctx.respond("Ticket type not found.", ephemeral=True)
+                return
+
+            if ticket_type.is_system:
+                await ctx.respond("Cannot publish a panel for a system ticket type.", ephemeral=True)
                 return
 
             if not ticket_type.enabled:

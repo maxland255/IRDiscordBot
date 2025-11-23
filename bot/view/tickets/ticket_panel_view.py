@@ -1,6 +1,6 @@
 import logging
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from datetime import datetime, UTC
 
 from discord import ButtonStyle, Interaction, Embed
@@ -11,6 +11,7 @@ from bot.database.schemas import TicketTypeSchema
 from bot.view.tickets import TicketReasonView
 
 if TYPE_CHECKING:
+    from bot.cogs.tickets import Tickets
     from bot.main import IRBot
 
 logger = logging.getLogger(__name__)
@@ -77,7 +78,12 @@ class TicketPanelView(DesignerView):
             return
 
         try:
-            ticket_channel = await TicketReasonView.create_ticket(interaction, self.bot, ticket_type)
+            tickets_cog: Optional["Tickets"] = self.bot.get_cog("Tickets")
+
+            if tickets_cog is None:
+                raise RuntimeError("Tickets cog is not loaded.")
+
+            ticket_channel = await tickets_cog.create_ticket_from_interaction(interaction, ticket_type)
 
             await interaction.response.send_message(
                 f"Your ticket has been created successfully. Please check your channels: {ticket_channel.mention}",

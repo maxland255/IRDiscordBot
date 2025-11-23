@@ -25,8 +25,16 @@ class GuildSchema(BaseModel):
     # Moderation
     report_channel_id: int | None = Field(None)
 
-    # tickets system
-    # pass
+    # Verification system
+    verification_ticket_type_id: int | None = Field(None)
+    verified_role_id: int | None = Field(None)
+    student_role_id: int | None = Field(None)
+    alumni_role_id: int | None = Field(None)
+    external_role_id: int | None = Field(None)
+    teacher_role_id: int | None = Field(None)
+    grace_period_days: int = Field(30)
+    new_member_verification_time_limit: int = Field(24)
+    allowed_email_domains: list[str] = Field(list)
 
     deleted_at: datetime | None = Field(None)
 
@@ -56,3 +64,14 @@ class GuildUpdate(BaseModel):
     report_channel_id: Optional[int] = Field(None)
 
     deleted_at: Optional[datetime] = Field(None)
+
+    # Verification system
+    verification_ticket_type_id: int | None = Field(None)
+    verified_role_id: int | None = Field(None)
+    student_role_id: int | None = Field(None)
+    alumni_role_id: int | None = Field(None)
+    external_role_id: int | None = Field(None)
+    teacher_role_id: int | None = Field(None)
+    grace_period_days: int | None = Field(None)
+    new_member_verification_time_limit: int | None = Field(None)
+    allowed_email_domains: list[str] | None = Field(None)

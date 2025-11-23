@@ -226,4 +226,10 @@ class TicketTypeConfigView(DesignerModal):
             inline=False,
         )
 
+        ticket_type_embed.add_field(
+            name="System Ticket Type",
+            value="Yes" if ticket_type.is_system else "No",
+            inline=False,
+        )
+
         return ticket_type_embed

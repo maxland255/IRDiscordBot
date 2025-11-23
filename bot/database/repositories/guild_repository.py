@@ -17,6 +17,14 @@ class GuildRepository(Protocol):
     """
 
     @abstractmethod
+    async def get_all_guilds(self) -> list[GuildSchema]:
+        """
+        Get all guilds.
+        :return:
+        """
+        ...
+
+    @abstractmethod
     async def get_guild_by_id(self, guild_id: int, raise_if_not_found: bool = False) -> Union[GuildSchema, None]:
         """
         Get a guild by its id.
@@ -57,6 +65,14 @@ class GuildRepository(Protocol):
 class SQLAlchemyGuildRepository(GuildRepository):
     def __init__(self, session_factory: async_sessionmaker):
         self.session_factory = session_factory
+
+    async def get_all_guilds(self) -> list[GuildSchema]:
+        async with self.session_factory() as session:
+            result = await session.execute(select(GuildModel))
+
+            db_guilds = result.scalars().all()
+
+            return [GuildSchema.model_validate(db_guild) for db_guild in db_guilds]
 
     async def get_guild_by_id(self, guild_id: int, raise_if_not_found: bool = False) -> Union[GuildSchema, None]:
         async with self.session_factory() as session:

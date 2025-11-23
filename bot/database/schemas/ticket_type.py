@@ -16,6 +16,8 @@ class TicketTypeCreate(BaseModel):
 
     enabled: bool = Field(True)
 
+    is_system: bool = Field(False)
+
 
 class TicketTypeSchema(BaseModel):
     id: int
@@ -31,6 +33,8 @@ class TicketTypeSchema(BaseModel):
     moderator_role_id: int
 
     enabled: bool
+
+    is_system: bool
 
     deleted_at: datetime | None
 

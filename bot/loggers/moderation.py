@@ -3,7 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Literal
 from datetime import datetime, UTC
 
-from discord import TextChannel, Member, Color
+from discord import TextChannel, Member, Color, Guild
 
 from bot.utils.get_guild import get_guild
 from bot.utils.get_channel import get_channel
@@ -65,7 +65,7 @@ class ModerationLogger:
         except Exception as e:
             logger.error(
                 f"Error when creating the logs entry for infraction with id: {infraction.id}\nInfraction: {infraction.model_dump_json()}\nMember: {member.id}\nModerator: {moderator.id}\nError: {e}",
-                exc_info=True
+                exc_info=e,
             )
 
     async def moderation_command_failed(
@@ -122,5 +122,39 @@ class ModerationLogger:
         except Exception as e:
             logger.error(
                 f"Error when creating the logs entry for failed moderation action: {action} on member {target_member.id} by {member.id} in guild {guild_id}\nReason: {reason}\nFailed reason: {failed_reason}\nError: {e}",
-                exc_info=True
+                exc_info=e,
+            )
+
+    async def moderation_kick(self, guild: Guild, member: Member, moderator: Member, reason: str):
+        try:
+            new_log_entry = LogEntryCreate(
+                guild_id=guild.id,
+                log_type=LogEntryType.infraction_kick,
+                actor_id=moderator.id,
+                target_id=member.id,
+                details={
+                    "reason": reason,
+                },
+            )
+
+            logs_channel = await self._get_log_channel(guild.id)
+
+            if logs_channel is not None:
+                embed_log = await generic_embed(
+                    title="Moderation Action",
+                    description=f"A member has been kicked from the server.",
+                    color=Color.red(),
+                    moderator=moderator.mention,
+                    target_member=member.mention,
+                    action="kick",
+                    reason=reason,
+                )
+
+                await logs_channel.send(embed=embed_log)
+
+            await self.bot.db_logs_entries.create_log_entry(new_log_entry)
+        except Exception as e:
+            logger.error(
+                f"Error when creating the logs entry for kick action on member {member.id} by {moderator.id} in guild {guild.id}\nReason: {reason}\nError: {e}",
+                exc_info=e,
             )

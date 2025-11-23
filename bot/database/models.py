@@ -1,11 +1,13 @@
-from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boolean, ForeignKey, JSON, Text
+from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boolean, ForeignKey, JSON, Text, \
+    UniqueConstraint, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from typing import Union, List
-from datetime import datetime
+from datetime import datetime, date
 
-from .schemas import InfractionType, InfractionResult, LogEntryType, ReportStatus, ReportAction, TicketStatus
+from .schemas import InfractionType, InfractionResult, LogEntryType, ReportStatus, ReportAction, TicketStatus, \
+    VerificationStatus
 
 
 class Base(DeclarativeBase):
@@ -33,7 +35,18 @@ class Guild(Base):
     # Moderation
     report_channel_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
 
-    # Tickets
+    # Verification System
+    verification_ticket_type_id: Mapped[Union[int, None]] = mapped_column(BigInteger, ForeignKey("ticket_types.id",
+                                                                                                 ondelete="SET NULL"),
+                                                                          nullable=True, default=None)
+    verified_role_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
+    student_role_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
+    alumni_role_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
+    external_role_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
+    teacher_role_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
+    grace_period_days: Mapped[int] = mapped_column(Integer, nullable=False, default=30)
+    new_member_verification_time_limit: Mapped[int] = mapped_column(Integer, nullable=False, default=24)
+    allowed_email_domains: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
     deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
 
@@ -194,7 +207,7 @@ class TicketType(Base):
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
 
-    name: Mapped[str] = mapped_column(String(16), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(16), nullable=False)
     description: Mapped[str] = mapped_column(String(4096), nullable=False)
 
     ticket_channel_category_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
@@ -204,6 +217,9 @@ class TicketType(Base):
     moderator_role_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
 
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # Indicate if this is a system ticket type (cannot be deleted or edited)
+    is_system: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
 
@@ -269,3 +285,40 @@ class TicketMessage(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     edited_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
     deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
+
+
+class Verifications(Base):
+    __tablename__ = "verifications"
+    __table_args__ = (
+        UniqueConstraint('guild_id', 'user_id', name='uq_guild_user'),
+        {'sqlite_autoincrement': True},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
+
+    joined_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+
+    user_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False, index=True)
+    status: Mapped[VerificationStatus] = mapped_column(Enum(VerificationStatus), nullable=False,
+                                                       default=VerificationStatus.pending_email)
+
+    hashed_code: Mapped[Union[str, None]] = mapped_column(Text, nullable=True, default=None)
+    code_expires_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    last_email_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    daily_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_attempt_date: Mapped[date | None] = mapped_column(Date, nullable=True, default=None)
+
+    user_email: Mapped[Union[str, None]] = mapped_column(String(255), nullable=True, default=None, index=True)
+    verification_expires_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                           index=True, default=None)
+
+    grace_period_ends_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                        default=None)
+    last_reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+    ticket_id: Mapped[Union[int, None]] = mapped_column(Integer, ForeignKey("tickets.id", ondelete="SET NULL"),
+                                                        nullable=True, default=None)
+
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)

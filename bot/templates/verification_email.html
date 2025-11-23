@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Discord</title>
+    <style>
+        /* Reset et styles de base pour une meilleure compatibilité */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f2f3f5;
+            margin: 0;
+            padding: 0;
+            color: #2e3338;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #5865F2;
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 30px 25px;
+            line-height: 1.6;
+        }
+
+        .code-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 6px;
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+        }
+
+        .code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #5865F2;
+            margin: 0;
+        }
+
+        .info-text {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #72767d;
+            border-top: 1px solid #eaeaea;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Vérification requise</h1>
+    </div>
+    <div class="content">
+        <p class="info-text">Bonjour,</p>
+        <p class="info-text">
+            Vous avez demandé à rejoindre le serveur Discord <strong>{{ guild_name }}</strong>.
+            Pour confirmer votre statut d'étudiant et accéder au serveur, veuillez utiliser le code de vérification
+            ci-dessous.
+        </p>
+
+        <div class="code-box">
+            <p class="code">{{ code }}</p>
+        </div>
+
+        <p class="info-text">
+            Ce code est valide pendant <strong>15 minutes</strong>.
+            Retournez sur Discord et entrez ce code dans le formulaire pour finaliser votre inscription.
+        </p>
+        <p class="info-text" style="color: #72767d; font-size: 14px;">
+            Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email en toute sécurité.
+        </p>
+    </div>
+    <div class="footer">
+        Ceci est un message automatique, merci de ne pas y répondre.<br>
+        © {{ current_year }} Comité IR
+    </div>
+</div>
+</body>
+</html>

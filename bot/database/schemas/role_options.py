@@ -1,8 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    from .role_panel import RolePanelSchema
+from typing import Optional
 
 
 class RoleOptionsCreate(BaseModel):
@@ -32,7 +29,7 @@ class RoleOptionsSchema(BaseModel):
 
 class RoleOptionsUpdate(BaseModel):
     id: int
-    
+
     role_id: Optional[int] = Field(None)
 
     emoji: Optional[str] = Field(None)

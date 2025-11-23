@@ -10,6 +10,7 @@ from .ticket_type import TicketTypeCreate, TicketTypeSchema, TicketTypeUpdate
 from .tickets import TicketStatus, TicketsCreate, TicketsSchema, TicketsUpdate
 from .ticket_panel import TicketPanelCreate, TicketPanelSchema, TicketPanelUpdate
 from .ticket_message import TicketMessageCreate, TicketMessageSchema, TicketMessageUpdate
+from .verifications import VerificationStatus, VerificationsCreate, VerificationsSchema, VerificationsUpdate
 
 __all__ = [
     "GuildSchema",
@@ -52,4 +53,8 @@ __all__ = [
     "TicketMessageCreate",
     "TicketMessageSchema",
     "TicketMessageUpdate",
+    "VerificationStatus",
+    "VerificationsCreate",
+    "VerificationsSchema",
+    "VerificationsUpdate",
 ]

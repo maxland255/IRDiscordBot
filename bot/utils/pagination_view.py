@@ -101,7 +101,7 @@ class PaginationView(View):
         emoji="➡️",
     )
     async def next_button(self, _: Button, interaction: Interaction):
-        if self.current_page > 0:
+        if self.current_page <= self.total_pages:
             self.current_page += 1
             self.update_buttons()
             await interaction.response.edit_message(

@@ -96,7 +96,7 @@ class PanelOptionView(DesignerModal):
                     emoji=emoji,
                 )
 
-            role_options_embed = self.print_role_options(role_option)
+            role_options_embed = self._print_role_options(role_option)
 
             await interaction.respond(embed=role_options_embed, ephemeral=True)
         except Exception as e:
@@ -136,7 +136,8 @@ class PanelOptionView(DesignerModal):
 
         return updated_role_option
 
-    def print_role_options(self, option: RoleOptionsSchema) -> Embed:
+    @staticmethod
+    def _print_role_options(option: RoleOptionsSchema) -> Embed:
         options_embed = Embed(
             title="Role Options",
             colour=Color.green(),
