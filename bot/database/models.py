@@ -25,15 +25,15 @@ class Guild(Base):
     default_timeout: Mapped[int] = mapped_column(Integer, nullable=False, default=600)
 
     # salon de logs
-    logs_moderation: Mapped[Union[int, None]] = mapped_column(Integer, default=None)
-    logs_server: Mapped[Union[int, None]] = mapped_column(Integer, default=None)
+    logs_moderation: Mapped[Union[int, None]] = mapped_column(BigInteger, default=None)
+    logs_server: Mapped[Union[int, None]] = mapped_column(BigInteger, default=None)
 
     # Rules
-    rules_channel_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
+    rules_channel_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
     rules_message_id: Mapped[Union[List[int], None]] = mapped_column(JSON, nullable=True, default=None)
 
     # Moderation
-    report_channel_id: Mapped[Union[int, None]] = mapped_column(Integer, nullable=True, default=None)
+    report_channel_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
 
     # Verification System
     verification_ticket_type_id: Mapped[Union[int, None]] = mapped_column(BigInteger, ForeignKey("ticket_types.id",
@@ -55,7 +55,7 @@ class GravityLevel(Base):
     __tablename__ = "gravity_levels"
     __table_args__ = {'sqlite_autoincrement': True}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
 
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
@@ -155,7 +155,7 @@ class RolePanel(Base):
     __tablename__ = "role_panels"
     __table_args__ = {'sqlite_autoincrement': True}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
 
@@ -203,7 +203,7 @@ class TicketType(Base):
     __tablename__ = "ticket_types"
     __table_args__ = {'sqlite_autoincrement': True}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
 
@@ -230,7 +230,7 @@ class Tickets(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    ticket_type_id: Mapped[int] = mapped_column(Integer, ForeignKey("ticket_types.id", ondelete="RESTRICT"),
+    ticket_type_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("ticket_types.id", ondelete="RESTRICT"),
                                                 nullable=False)
     ticket_type: Mapped[TicketType] = relationship(TicketType)
 
@@ -256,7 +256,7 @@ class TicketPanel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    ticket_type_id: Mapped[int] = mapped_column(Integer, ForeignKey("ticket_types.id", ondelete="RESTRICT"),
+    ticket_type_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("ticket_types.id", ondelete="RESTRICT"),
                                                 nullable=False, index=True)
     ticket_type: Mapped[TicketType] = relationship(TicketType)
 

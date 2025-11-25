@@ -31,10 +31,6 @@ class VerificationMailer:
         :return:
         """
 
-        print(code)
-
-        return True
-
         template = self.template_env.get_template("verification_email.html")
         html_content = template.render(
             guild_name=guild_name,
@@ -50,14 +46,14 @@ class VerificationMailer:
 
         msg.add_alternative(html_content, subtype='html')
 
-        msg.set_content(
-            f"Hello,\n\n"
-            f"Your verification code for {guild_name} is: {code}\n\n"
-            f"Please enter this code in the verification prompt to complete your verification.\n\n"
-            f"If you did not request this code, please ignore this email.\n\n"
-            f"Thank you,\n"
-            f"{guild_name} Team"
-        )
+        # msg.set_content(
+        #     f"Hello,\n\n"
+        #     f"Your verification code for {guild_name} is: {code}\n\n"
+        #     f"Please enter this code in the verification prompt to complete your verification.\n\n"
+        #     f"If you did not request this code, please ignore this email.\n\n"
+        #     f"Thank you,\n"
+        #     f"{guild_name} Team"
+        # )
 
         try:
             if self.settings.SMTP_USE_TLS and self.settings.SMTP_START_TLS:
@@ -67,8 +63,8 @@ class VerificationMailer:
                 msg,
                 hostname=self.settings.SMTP_HOST,
                 port=self.settings.SMTP_PORT,
-                username=self.settings.SMTP_USERNAME,
-                password=self.settings.SMTP_PASSWORD,
+                username=self.settings.SMTP_USER,
+                password=self.settings.SMTP_PASS.get_secret_value(),
                 use_tls=self.settings.SMTP_USE_TLS,
                 start_tls=self.settings.SMTP_START_TLS,
             )

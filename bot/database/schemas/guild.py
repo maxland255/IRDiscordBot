@@ -34,7 +34,7 @@ class GuildSchema(BaseModel):
     teacher_role_id: int | None = Field(None)
     grace_period_days: int = Field(30)
     new_member_verification_time_limit: int = Field(24)
-    allowed_email_domains: list[str] = Field(list)
+    allowed_email_domains: list[str] = Field(default_factory=list)
 
     deleted_at: datetime | None = Field(None)
 

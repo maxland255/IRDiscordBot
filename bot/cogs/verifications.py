@@ -576,6 +576,11 @@ class Verifications(Cog, CogsBase):
     ):
         try:
             await self._on_member_join(member)
+
+            await ctx.respond(
+                f"✅ Successfully created a verification entry for {member.mention} if one did not already exist.",
+                ephemeral=True,
+            )
         except Exception as e:
             logger.error(f"Error creating verification for member {member.id} in guild {member.guild.id}",
                          exc_info=e)

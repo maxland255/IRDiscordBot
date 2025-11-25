@@ -7,13 +7,16 @@ FROM python:3.13-slim as production
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN useradd --create-home appuser
 
 COPY --from=base /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
-COPY ./bot ./bot
+COPY --from=base /usr/local/bin /usr/local/bin
 
-RUN useradd --create-home appuser
+COPY --chown=appuser ./bot ./bot
+
+RUN chown -R appuser:appuser /app
+RUN mkdir /app/bot/logs && chown -R appuser:appuser /app/bot/logs
+
 USER appuser
 
 ENV ENV=prod

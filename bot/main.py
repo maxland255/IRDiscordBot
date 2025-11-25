@@ -3,7 +3,7 @@ import asyncio
 
 from .utils.logging_setup import setup_logging
 from .core.config import get_settings
-from .database.data.engine import engine, AsyncSession
+from .database.data.engine import init_db
 from .database.models import Base
 from .cogs import ALL_COGS
 from .loggers import BotLogger
@@ -35,7 +35,10 @@ class IRBot(Bot):
 
         self._has_init = False
 
-        asyncio.run(self._setup_database())
+        self._engine = None
+        self._AsyncSession = None
+
+        # asyncio.run(self._setup_database())
 
         if self.settings.ENV == "dev":
             logger.warning("Bot is running in development mode.")
@@ -51,9 +54,8 @@ class IRBot(Bot):
         # Services
         self._verification_mail_service: VerificationMailer = VerificationMailer()
 
-    @staticmethod
-    async def _setup_database():
-        async with engine.begin() as conn:
+    async def _setup_database(self):
+        async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
     def run(self):
@@ -132,6 +134,11 @@ class IRBot(Bot):
 
         if not self._has_init:
             self._has_init = True
+
+            self._engine, self._AsyncSession = await init_db()
+
+            await self._setup_database()
+
             await self.init_all_cogs()
 
             # Load role panels views
@@ -160,55 +167,55 @@ class IRBot(Bot):
     # Database repository
     @property
     def db_guilds(self):
-        return SQLAlchemyGuildRepository(AsyncSession)
+        return SQLAlchemyGuildRepository(self._AsyncSession)
 
     @property
     def db_gravity_levels(self):
-        return SQLAlchemyGravityLevelRepository(AsyncSession)
+        return SQLAlchemyGravityLevelRepository(self._AsyncSession)
 
     @property
     def db_infractions(self):
-        return SQLAlchemyInfractionsRepository(AsyncSession)
+        return SQLAlchemyInfractionsRepository(self._AsyncSession)
 
     @property
     def db_logs_entries(self):
-        return SQLAlchemyLogsEntryRepository(AsyncSession)
+        return SQLAlchemyLogsEntryRepository(self._AsyncSession)
 
     @property
     def db_guild_rules(self):
-        return SQLAlchemyGuildRulesRepository(AsyncSession)
+        return SQLAlchemyGuildRulesRepository(self._AsyncSession)
 
     @property
     def db_role_panels(self):
-        return SQLAlchemyRolePanelRepository(AsyncSession)
+        return SQLAlchemyRolePanelRepository(self._AsyncSession)
 
     @property
     def db_role_options(self):
-        return SQLAlchemyRoleOptionsRepository(AsyncSession)
+        return SQLAlchemyRoleOptionsRepository(self._AsyncSession)
 
     @property
     def db_reports(self):
-        return SQLAlchemyReportRepository(AsyncSession)
+        return SQLAlchemyReportRepository(self._AsyncSession)
 
     @property
     def db_ticket_type(self):
-        return SQLAlchemyTicketTypeRepository(AsyncSession)
+        return SQLAlchemyTicketTypeRepository(self._AsyncSession)
 
     @property
     def db_ticket_panel(self):
-        return SQLAlchemyTicketPanelRepository(AsyncSession)
+        return SQLAlchemyTicketPanelRepository(self._AsyncSession)
 
     @property
     def db_tickets(self):
-        return SQLAlchemyTicketsRepository(AsyncSession)
+        return SQLAlchemyTicketsRepository(self._AsyncSession)
 
     @property
     def db_ticket_messages(self):
-        return SQLAlchemyTicketMessageRepository(AsyncSession)
+        return SQLAlchemyTicketMessageRepository(self._AsyncSession)
 
     @property
     def db_verifications(self):
-        return SQLAlchemyVerificationsRepository(AsyncSession)
+        return SQLAlchemyVerificationsRepository(self._AsyncSession)
 
     # Services property
     @property
