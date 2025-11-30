@@ -513,7 +513,7 @@ class Verifications(Cog, CogsBase):
                 bool,
                 description="Whether or not to close the verification ticket if one exists",
                 required=False,
-                default=True,
+                default=False,
             ),
     ):
         try:
@@ -548,6 +548,15 @@ class Verifications(Cog, CogsBase):
                 await ticket_cog.close_ticket(ctx.guild, ticket)
 
             await self.set_member_status(self.bot, ctx.guild, member, verification, status)
+
+            await self.bot.logger.verification.success_manual_verification(
+                ctx.guild,
+                member,
+                ctx.author,
+                verification,
+                status,
+                reason="Manual status change via admin command",
+            )
 
             await ctx.respond(
                 f"✅ Successfully set {member.mention}'s verification status to {status.name}.",

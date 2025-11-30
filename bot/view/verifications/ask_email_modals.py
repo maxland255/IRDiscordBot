@@ -10,8 +10,6 @@ from discord.ui import DesignerModal, InputText, Label
 
 from bot.database.schemas import VerificationsSchema, VerificationsUpdate
 
-from .enter_code_modals import EnterCodeModals
-
 if TYPE_CHECKING:
     from bot.main import IRBot
 

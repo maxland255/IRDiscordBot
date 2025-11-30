@@ -1,5 +1,4 @@
 import logging
-import asyncio
 
 from .utils.logging_setup import setup_logging
 from .core.config import get_settings
@@ -20,7 +19,7 @@ from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityL
     SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository, SQLAlchemyGuildRulesRepository, \
     SQLAlchemyRolePanelRepository, SQLAlchemyRoleOptionsRepository, SQLAlchemyReportRepository, \
     SQLAlchemyTicketsRepository, SQLAlchemyTicketMessageRepository, SQLAlchemyTicketPanelRepository, \
-    SQLAlchemyTicketTypeRepository, SQLAlchemyVerificationsRepository
+    SQLAlchemyTicketTypeRepository, SQLAlchemyVerificationsRepository, SQLAlchemyEmbedsRepository
 
 from discord import Bot, Intents
 
@@ -37,8 +36,6 @@ class IRBot(Bot):
 
         self._engine = None
         self._AsyncSession = None
-
-        # asyncio.run(self._setup_database())
 
         if self.settings.ENV == "dev":
             logger.warning("Bot is running in development mode.")
@@ -216,6 +213,10 @@ class IRBot(Bot):
     @property
     def db_verifications(self):
         return SQLAlchemyVerificationsRepository(self._AsyncSession)
+
+    @property
+    def db_embeds(self):
+        return SQLAlchemyEmbedsRepository(self._AsyncSession)
 
     # Services property
     @property

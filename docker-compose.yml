@@ -1,6 +1,4 @@
 # docker-compose.yml
-version: '3.8'
-
 services:
   # Production environment
   bot-prod:
@@ -21,13 +19,13 @@ services:
     deploy:
       resources:
         limits:
-          # Limit the container to 50% of a CPU
-          cpus: '0.50'
+          # Limit the container to 25% of a CPU
+          cpus: '0.25'
           # Limit the container to 512 Mo of RAM
           memory: 512M
         reservations:
-          # Reserve 25% of a CPU
-          cpus: '0.25'
+          # Reserve 10% of a CPU
+          cpus: '0.10'
           # Reserve 128 Mo of RAM
           memory: 128M
 

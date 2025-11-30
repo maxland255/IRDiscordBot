@@ -1,15 +1,16 @@
+import discord
 import logging
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 from datetime import datetime, UTC
 
 from discord import Cog, SlashCommandGroup, Permissions, InteractionContextType, ApplicationContext, Option, Guild, \
     Embed, Color
 
-from bot.database.schemas import GuildSchema, GuildUpdate, GuildRulesCreate, GuildRulesSchema, GuildRulesUpdate
-from bot.exception import GuildRuleNotFound
+from bot.database.schemas import GuildSchema, GuildUpdate, GuildRulesSchema, GuildRulesUpdate
 from bot.utils.get_channel import get_channel
+from bot.view.rules.rules_edit_modals import RulesEditModal
 
 from .cogs_base import CogsBase
 
@@ -46,20 +47,8 @@ class Rules(Cog, CogsBase):
     async def rules_add(
             self,
             ctx: ApplicationContext,
-            title: str = Option(
-                str,
-                max_length=256,
-                required=True,
-            ),
-            rules: str = Option(
-                str,
-                max_length=1024,
-                required=True,
-            ),
     ):
         try:
-            await ctx.defer(ephemeral=True)
-
             guild_config = await self.get_guild_configuration(ctx.guild.id)
 
             if guild_config is None:
@@ -68,20 +57,9 @@ class Rules(Cog, CogsBase):
                 )
                 return
 
-            new_rules = GuildRulesCreate(
-                guild_id=ctx.guild.id,
-                title=title,
-                rules=rules,
+            await ctx.response.send_modal(
+                RulesEditModal(self.bot, self)
             )
-
-            new_rules = await self.bot.db_guild_rules.create_guild_rules(new_rules)
-
-            rules_embeds = await self.create_rules_embed(ctx.guild, [new_rules], preview=True)
-
-            await ctx.respond(f"Rule added to guild {ctx.guild.name}.", ephemeral=True)
-
-            for embed in rules_embeds:
-                await ctx.respond(embed=embed, ephemeral=True)
         except Exception as e:
             logger.error(f"Error adding rule to guild {ctx.guild.name}: {e}", exc_info=True)
             await ctx.respond(f"Error adding rule to guild {ctx.guild.name}", ephemeral=True)
@@ -98,42 +76,17 @@ class Rules(Cog, CogsBase):
                 description="ID of the rule to edit",
                 required=True,
             ),
-            title: Optional[str] = Option(
-                str,
-                max_length=256,
-            ),
-            rules: Optional[str] = Option(
-                str,
-                max_length=1024,
-            ),
     ):
         try:
-            await ctx.defer(ephemeral=True)
+            rules = await self.bot.db_guild_rules.get_specific_guild_rules(rule_id=rule_id)
 
-            update_guild_rules = GuildRulesUpdate(
-                id=rule_id,
-                rules_require_publish=True,
-            )
-
-            if title is not None:
-                update_guild_rules.title = title
-
-            if rules is not None:
-                update_guild_rules.rules = rules
-
-            try:
-                update_guild_rules = await self.bot.db_guild_rules.update_guild_rules(update_guild_rules)
-            except GuildRuleNotFound as e:
-                logger.exception(e)
+            if rules is None:
                 await ctx.respond(f"Error guild rules with id {rule_id} not found.", ephemeral=True)
                 return
 
-            rules_embeds = await self.create_rules_embed(ctx.guild, [update_guild_rules], preview=True)
-
-            await ctx.respond(f"Rule {rule_id} edited in guild {ctx.guild.name}.", ephemeral=True)
-
-            for embed in rules_embeds:
-                await ctx.respond(embed=embed, ephemeral=True)
+            await ctx.response.send_modal(
+                RulesEditModal(self.bot, self, rules)
+            )
         except Exception as e:
             logger.error(f"Error editing rule {rule_id} in guild {ctx.guild.name}: {e}", exc_info=True)
             await ctx.respond(f"Error editing rule {rule_id} in guild {ctx.guild.name}", ephemeral=True)
@@ -236,10 +189,13 @@ class Rules(Cog, CogsBase):
             # Remove all current rules
             if guild_config.rules_message_id is not None:
                 for rule_message_id in guild_config.rules_message_id:
-                    message = await rules_channel.fetch_message(rule_message_id)
+                    try:
+                        message = await rules_channel.fetch_message(rule_message_id)
 
-                    if message is not None:
-                        await message.delete(reason="Rules published")
+                        if message is not None:
+                            await message.delete(reason="Rules published")
+                    except discord.errors.NotFound:
+                        logger.warning(f"Message with id {rule_message_id} not found in guild {ctx.guild.name}")
 
             guild_rules = await self.bot.db_guild_rules.get_guild_rules(ctx.guild.id)
 
@@ -296,7 +252,7 @@ class Rules(Cog, CogsBase):
             title=f"Rules for {guild.name}" if not preview else f"Rules preview for {guild.name}",
             description="Please read these rules carefully before participating in this server."
                         " If you do not agree with any of these rules, you will be kicked.",
-            colour=Color.green(),
+            colour=Color.dark_blue(),
             timestamp=datetime.now(UTC),
         )
         rules_number = 0
@@ -316,7 +272,7 @@ class Rules(Cog, CogsBase):
                          rule.title if not with_id else f"{rule.id}: {rule.title}") + (
                          " (Not published)" if preview and rule.rules_require_publish else ""),
                 value=rule.rules,
-                inline=False,
+                inline=not with_id,
             )
 
         rules_embeds.append(rules_embed)
@@ -327,26 +283,3 @@ class Rules(Cog, CogsBase):
             )
 
         return rules_embeds
-
-    # @Cog.listener()
-    # async def on_guild_update(self, _: Guild, after: Guild):
-    #     try:
-    #         if self.disable_rules_updates:
-    #             logger.critical("Rules updates are disabled. Please check logs for more information.")
-    #             return
-    #
-    #         all_rules: set[str] = set()
-    #
-    #         new_rules = await self.fetch_rules_from_undocumented_api(after.id)
-    #
-    #         if new_rules is None:
-    #             return
-    #
-    #         for rule in new_rules:
-    #             if rule.field_type == "TERMS":
-    #                 for value in rule.values:
-    #                     all_rules.add(value)
-    #
-    #         await self.send_rules_to_guild(after, list(all_rules))
-    #     except Exception as e:
-    #         logger.error(f"Error updating rules for guild {after.id}: {e}", exc_info=True)

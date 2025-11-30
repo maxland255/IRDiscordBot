@@ -11,6 +11,7 @@ from .tickets import TicketStatus, TicketsCreate, TicketsSchema, TicketsUpdate
 from .ticket_panel import TicketPanelCreate, TicketPanelSchema, TicketPanelUpdate
 from .ticket_message import TicketMessageCreate, TicketMessageSchema, TicketMessageUpdate
 from .verifications import VerificationStatus, VerificationsCreate, VerificationsSchema, VerificationsUpdate
+from .embeds import EmbedsCreate, EmbedsSchema, EmbedsUpdate, EmbedFieldsCreate, EmbedFieldsSchema, EmbedFieldsUpdate
 
 __all__ = [
     "GuildSchema",
@@ -57,4 +58,10 @@ __all__ = [
     "VerificationsCreate",
     "VerificationsSchema",
     "VerificationsUpdate",
+    "EmbedsCreate",
+    "EmbedsSchema",
+    "EmbedsUpdate",
+    "EmbedFieldsCreate",
+    "EmbedFieldsSchema",
+    "EmbedFieldsUpdate",
 ]

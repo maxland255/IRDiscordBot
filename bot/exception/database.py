@@ -1,7 +1,7 @@
 from bot.database.schemas import GuildSchema, GuildUpdate, GravityLevelSchema, GravityLevelUpdate, GravityLevelCreate, \
     InfractionsUpdate, InfractionsSchema, InfractionsCreate, GuildRulesSchema, GuildRulesUpdate, RolePanelSchema, \
     RolePanelUpdate, RoleOptionsUpdate, ReportSchema, TicketTypeUpdate, TicketPanelUpdate, TicketsUpdate, \
-    TicketMessageUpdate, VerificationsUpdate
+    TicketMessageUpdate, VerificationsUpdate, EmbedsUpdate, EmbedFieldsUpdate
 from typing import Union
 
 
@@ -144,3 +144,23 @@ class VerificationRateLimitError(Exception):
     def __init__(self, message, retry_after: float = None):
         super().__init__(message)
         self.retry_after = retry_after
+
+
+class EmbedsNotFound(Exception):
+    def __init__(self, embed_id: int | EmbedsUpdate) -> None:
+        self.embed_id = embed_id
+
+    def __str__(self) -> str:
+        if isinstance(self.embed_id, int):
+            return f"Embed {self.embed_id} not found"
+        return f"Embed {self.embed_id.id} not found"
+
+
+class EmbedFieldsNotFound(Exception):
+    def __init__(self, embed_field_id: int | EmbedFieldsUpdate) -> None:
+        self.embed_field_id = embed_field_id
+
+    def __str__(self) -> str:
+        if isinstance(self.embed_field_id, int):
+            return f"Embed Field {self.embed_field_id} not found"
+        return f"Embed Field {self.embed_field_id.id} not found"

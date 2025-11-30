@@ -9,6 +9,7 @@ from .tickets import Tickets
 from .tickets_config import TicketsConfig
 from .tickets_admin import TicketsAdmin
 from .verifications import Verifications
+from .embeds import Embeds
 
 ALL_COGS: dict[str, Type[Any]] = {
     "moderation": Moderation,
@@ -20,4 +21,5 @@ ALL_COGS: dict[str, Type[Any]] = {
     "tickets_config": TicketsConfig,
     "tickets_admin": TicketsAdmin,
     "verifications": Verifications,
+    "embeds": Embeds,
 }

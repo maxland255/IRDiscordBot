@@ -6,10 +6,15 @@ from pydantic import BaseModel, Field
 
 
 class LogEntryType(str, Enum):
+    # Moderation
     infraction_warn = "INFRACTION_WARN"
     infraction_timeout = "INFRACTION_TIMEOUT"
     infraction_kick = "INFRACTION_KICK"
     infraction_ban = "INFRACTION_BAN"
+
+    # Verification
+    verification_manual = "VERIFICATION_MANUAL"
+
     unknown = "UNKNOWN"
 
 

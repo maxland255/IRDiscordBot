@@ -72,7 +72,7 @@ class TicketVerifResultPanelView(DesignerView):
                 )
                 return
 
-            if not self._check_member_permissions(interaction.user, ticket):
+            if not await self._check_member_permissions(interaction.user, ticket):
                 await interaction.response.send_message(
                     "You do not have permission to perform this action.",
                     ephemeral=True,

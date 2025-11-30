@@ -517,7 +517,7 @@ Weight: {gravity_level.weight}""",
             )
 
             if gravity_levels_num >= 25:
-                self.logger.error(f"Gravity level {gravity_level.name} is too high for serveur {guild.id}")
+                self.logger.error(f"Gravity level {gravity_level.name} is too high for server {guild.id}")
                 gravity_levels_config_embed.description = "Too many gravity levels to display, please use the website to view all gravity levels."
                 break
 

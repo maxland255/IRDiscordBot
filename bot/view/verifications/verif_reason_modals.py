@@ -162,7 +162,14 @@ class VerifReasonModals(DesignerModal):
                 await verification_cogs.set_member_status(self.bot, interaction.guild, member, verification,
                                                           verification_status)
 
-            # TODO: Add log for verification action reason
+                await self.bot.logger.verification.success_manual_verification(
+                    guild=interaction.guild,
+                    member=member,
+                    moderator=interaction.user,
+                    verification=verification,
+                    new_status=verification_status,
+                    reason=reason,
+                )
 
             ticket_cog: "Tickets | None" = self.bot.get_cog("Tickets")
 
@@ -174,6 +181,8 @@ class VerifReasonModals(DesignerModal):
                 return
 
             await ticket_cog.close_ticket(interaction.guild, self.ticket, interaction.channel)
+
+            await interaction.response.defer()
         except Exception as e:
             logger.error(f"Error processing verification reason modal for ticket ID {self.ticket.id}", exc_info=e)
             await interaction.response.send_message(

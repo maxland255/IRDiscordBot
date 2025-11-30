@@ -1,5 +1,5 @@
 from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boolean, ForeignKey, JSON, Text, \
-    UniqueConstraint, Date
+    UniqueConstraint, Date, SmallInteger
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -48,7 +48,7 @@ class Guild(Base):
     new_member_verification_time_limit: Mapped[int] = mapped_column(Integer, nullable=False, default=24)
     allowed_email_domains: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class GravityLevel(Base):
@@ -65,7 +65,7 @@ class GravityLevel(Base):
     description: Mapped[str] = mapped_column(String(100), nullable=False)
     weight: Mapped[float] = mapped_column(Float, nullable=False)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class Infractions(Base):
@@ -89,14 +89,14 @@ class Infractions(Base):
                                                          nullable=True)
     gravity: Mapped[Union[GravityLevel, None]] = relationship(GravityLevel)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=func.now)
 
     infraction_result: Mapped[InfractionResult] = mapped_column(Enum(InfractionResult), nullable=False)
-    timeout_end: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True)
+    timeout_end: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class LogEntry(Base):
@@ -114,7 +114,7 @@ class LogEntry(Base):
 
     details: Mapped[dict] = mapped_column(JSON, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=func.now)
 
 
 class GuildRules(Base):
@@ -130,7 +130,7 @@ class GuildRules(Base):
 
     rules_require_publish: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class RoleOptions(Base):
@@ -171,7 +171,7 @@ class RolePanel(Base):
     title: Mapped[str] = mapped_column(String(256), nullable=False)
     description: Mapped[Union[str, None]] = mapped_column(String(4096), nullable=True, default=None)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
     options: Mapped[List[RoleOptions]] = relationship(RoleOptions, back_populates="panel")
 
@@ -196,7 +196,7 @@ class Report(Base):
 
     handler_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, autoincrement=False, default=None)
     handler_action: Mapped[Union[ReportAction, None]] = mapped_column(Enum(ReportAction), nullable=True, default=None)
-    handled_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    handled_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class TicketType(Base):
@@ -221,7 +221,7 @@ class TicketType(Base):
     # Indicate if this is a system ticket type (cannot be deleted or edited)
     is_system: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class Tickets(Base):
@@ -246,8 +246,8 @@ class Tickets(Base):
     handler_id: Mapped[Union[int, None]] = mapped_column(BigInteger, nullable=True, default=None)
     is_locked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class TicketPanel(Base):
@@ -282,9 +282,9 @@ class TicketMessage(Base):
     reference_json: Mapped[dict] = mapped_column(JSON, nullable=True)
     embeds_json: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    edited_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
-    deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    edited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    deleted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class Verifications(Base):
@@ -298,7 +298,7 @@ class Verifications(Base):
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
 
-    joined_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
 
     user_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False, index=True)
     status: Mapped[VerificationStatus] = mapped_column(Enum(VerificationStatus), nullable=False,
@@ -321,4 +321,59 @@ class Verifications(Base):
     ticket_id: Mapped[Union[int, None]] = mapped_column(Integer, ForeignKey("tickets.id", ondelete="SET NULL"),
                                                         nullable=True, default=None)
 
-    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime, nullable=True, default=None)
+    deleted_at: Mapped[Union[datetime, None]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+
+class Embeds(Base):
+    __tablename__ = "embeds"
+    __table_args__ = (
+        {'sqlite_autoincrement': True},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
+
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(4096), nullable=True, default=None)
+    url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+    timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    color: Mapped[int | None] = mapped_column(SmallInteger, nullable=True, default=None)
+
+    footer_text: Mapped[str | None] = mapped_column(String(2048), nullable=True, default=None)
+    footer_icon_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+
+    thumbnail_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+
+    video_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+
+    provider_name: Mapped[str | None] = mapped_column(String(256), nullable=True, default=None)
+    provider_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+
+    author_name: Mapped[str | None] = mapped_column(String(256), nullable=True, default=None)
+    author_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+    author_icon_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+
+
+class EmbedFields(Base):
+    __tablename__ = "embed_fields"
+    __table_args__ = (
+        {'sqlite_autoincrement': True},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    embed_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("embeds.id", ondelete="CASCADE"), nullable=False,
+                                          index=True)
+    embed: Mapped[Embeds] = relationship(Embeds)
+
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    value: Mapped[str] = mapped_column(String(1024), nullable=False)
+    inline: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
