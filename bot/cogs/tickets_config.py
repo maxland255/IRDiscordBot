@@ -188,6 +188,56 @@ class TicketsConfig(Cog, CogsBase):
             await ctx.respond("An error occurred while editing the ticket type.", ephemeral=True)
 
     @tickets_type.command(
+        name="color",
+        description="Set a color for the ticket type",
+    )
+    async def ticket_type_color(
+            self,
+            ctx: ApplicationContext,
+            ticket_type_id: int = Option(
+                int,
+                description="ID of the ticket type",
+                required=True,
+            ),
+            color: str = Option(
+                str,
+                description="The color of the ticket type",
+                required=False,
+                default=None,
+            )
+    ):
+        try:
+            await ctx.defer(ephemeral=True)
+
+            ticket_type = await self.bot.db_ticket_type.get_ticket_type_by_id(ticket_type_id)
+
+            if not ticket_type or ticket_type.deleted_at is not None:
+                await ctx.respond("Ticket type not found.", ephemeral=True)
+                return
+
+            if ticket_type.is_system:
+                await ctx.respond("System ticket types cannot be edited.", ephemeral=True)
+                return
+
+            new_color = int(color.lstrip("#"), 16) if color is not None else 0x3498db
+
+            ticket_type_update = TicketTypeUpdate(
+                id=ticket_type.id,
+                embed_color=new_color,
+            )
+
+            ticket_type = await self.bot.db_ticket_type.update_ticket_type(ticket_type_update)
+
+            await ctx.respond(
+                "Ticket type color has been changed.",
+                embed=await TicketTypeConfigView.create_ticket_type_embed(self.bot, ctx.guild, ticket_type),
+                ephemeral=True,
+            )
+        except Exception as e:
+            logger.exception("Failed to edit ticket type color", exc_info=e)
+            await ctx.respond("An error occurred while editing the ticket type color.", ephemeral=True)
+
+    @tickets_type.command(
         name="enable",
         description="Enable or disable a ticket type",
     )

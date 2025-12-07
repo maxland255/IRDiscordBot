@@ -15,6 +15,9 @@ from .view.verifications.verification_choose_view import VerificationChooseView
 from .view.verifications.ticket_verif_result_panel_view import TicketVerifResultPanelView
 from .services.mailer import VerificationMailer
 
+from .database.repositories import GuildRepository, GravityLevelRepository, InfractionsRepository, LogsEntryRepository, \
+    GuildRulesRepository, RolePanelRepository, RoleOptionsRepository, ReportRepository, TicketsRepository, \
+    TicketMessageRepository, TicketPanelRepository, TicketTypeRepository, VerificationsRepository, EmbedsRepository
 from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityLevelRepository, \
     SQLAlchemyInfractionsRepository, SQLAlchemyLogsEntryRepository, SQLAlchemyGuildRulesRepository, \
     SQLAlchemyRolePanelRepository, SQLAlchemyRoleOptionsRepository, SQLAlchemyReportRepository, \
@@ -163,59 +166,59 @@ class IRBot(Bot):
 
     # Database repository
     @property
-    def db_guilds(self):
+    def db_guilds(self) -> GuildRepository:
         return SQLAlchemyGuildRepository(self._AsyncSession)
 
     @property
-    def db_gravity_levels(self):
+    def db_gravity_levels(self) -> GravityLevelRepository:
         return SQLAlchemyGravityLevelRepository(self._AsyncSession)
 
     @property
-    def db_infractions(self):
+    def db_infractions(self) -> InfractionsRepository:
         return SQLAlchemyInfractionsRepository(self._AsyncSession)
 
     @property
-    def db_logs_entries(self):
+    def db_logs_entries(self) -> LogsEntryRepository:
         return SQLAlchemyLogsEntryRepository(self._AsyncSession)
 
     @property
-    def db_guild_rules(self):
+    def db_guild_rules(self) -> GuildRulesRepository:
         return SQLAlchemyGuildRulesRepository(self._AsyncSession)
 
     @property
-    def db_role_panels(self):
+    def db_role_panels(self) -> RolePanelRepository:
         return SQLAlchemyRolePanelRepository(self._AsyncSession)
 
     @property
-    def db_role_options(self):
+    def db_role_options(self) -> RoleOptionsRepository:
         return SQLAlchemyRoleOptionsRepository(self._AsyncSession)
 
     @property
-    def db_reports(self):
+    def db_reports(self) -> ReportRepository:
         return SQLAlchemyReportRepository(self._AsyncSession)
 
     @property
-    def db_ticket_type(self):
+    def db_ticket_type(self) -> TicketTypeRepository:
         return SQLAlchemyTicketTypeRepository(self._AsyncSession)
 
     @property
-    def db_ticket_panel(self):
+    def db_ticket_panel(self) -> TicketPanelRepository:
         return SQLAlchemyTicketPanelRepository(self._AsyncSession)
 
     @property
-    def db_tickets(self):
+    def db_tickets(self) -> TicketsRepository:
         return SQLAlchemyTicketsRepository(self._AsyncSession)
 
     @property
-    def db_ticket_messages(self):
+    def db_ticket_messages(self) -> TicketMessageRepository:
         return SQLAlchemyTicketMessageRepository(self._AsyncSession)
 
     @property
-    def db_verifications(self):
+    def db_verifications(self) -> VerificationsRepository:
         return SQLAlchemyVerificationsRepository(self._AsyncSession)
 
     @property
-    def db_embeds(self):
+    def db_embeds(self) -> EmbedsRepository:
         return SQLAlchemyEmbedsRepository(self._AsyncSession)
 
     # Services property

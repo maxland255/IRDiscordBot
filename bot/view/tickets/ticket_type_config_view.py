@@ -189,7 +189,7 @@ class TicketTypeConfigView(DesignerModal):
         ticket_type_embed = Embed(
             title=ticket_type.name,
             description=ticket_type.description,
-            color=Color.blurple(),
+            color=ticket_type.embed_color,
         )
 
         ticket_type_embed.add_field(

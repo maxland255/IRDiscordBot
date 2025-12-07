@@ -1,5 +1,5 @@
 from sqlalchemy import Integer, String, BigInteger, Float, DateTime, Enum, Boolean, ForeignKey, JSON, Text, \
-    UniqueConstraint, Date, SmallInteger
+    UniqueConstraint, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -209,6 +209,7 @@ class TicketType(Base):
 
     name: Mapped[str] = mapped_column(String(16), nullable=False)
     description: Mapped[str] = mapped_column(String(4096), nullable=False)
+    embed_color: Mapped[int] = mapped_column(Integer, nullable=False, default=0x3498db)
 
     ticket_channel_category_id: Mapped[int] = mapped_column(BigInteger, nullable=False, autoincrement=False)
 
@@ -338,7 +339,7 @@ class Embeds(Base):
     description: Mapped[str | None] = mapped_column(String(4096), nullable=True, default=None)
     url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
-    color: Mapped[int | None] = mapped_column(SmallInteger, nullable=True, default=None)
+    color: Mapped[int | None] = mapped_column(Integer, nullable=True, default=None)
 
     footer_text: Mapped[str | None] = mapped_column(String(2048), nullable=True, default=None)
     footer_icon_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
@@ -366,7 +367,7 @@ class EmbedFields(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    embed_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("embeds.id", ondelete="CASCADE"), nullable=False,
+    embed_id: Mapped[int] = mapped_column(Integer, ForeignKey("embeds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
     embed: Mapped[Embeds] = relationship(Embeds)
 

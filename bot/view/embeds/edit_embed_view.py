@@ -149,6 +149,13 @@ class EditEmbedView(DesignerView):
                         )
                     )
                 case "embed:edit:delete_field":
+                    if len(self.embed_field) == 0:
+                        await interaction.response.send_message(
+                            "There are no fields to delete.",
+                            ephemeral=True,
+                        )
+                        return
+
                     await interaction.response.send_modal(
                         DeleteEmbedFieldModal(
                             EditEmbedView,

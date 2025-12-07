@@ -114,6 +114,20 @@ class VerifReasonModals(DesignerModal):
                 )
                 return
 
+            # TODO:
+            if verification.status in (
+                    VerificationStatus.verified_alumni,
+                    VerificationStatus.verified_external,
+                    VerificationStatus.verified_teacher,
+                    VerificationStatus.verified_student,
+                    VerificationStatus.kicked,
+            ):
+                await interaction.response.send_message(
+                    "An error occurred while trying to precess your request. Verification is already closed",
+                    ephemeral=True,
+                )
+                return
+
             guild_config = await self.bot.db_guilds.get_guild_by_id(interaction.guild_id)
 
             if guild_config is None:

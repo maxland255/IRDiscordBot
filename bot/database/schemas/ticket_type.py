@@ -7,6 +7,7 @@ class TicketTypeCreate(BaseModel):
 
     name: str = Field(max_length=16)
     description: str = Field(max_length=4096)
+    embed_color: int = Field(default=0x3498db)
 
     ticket_channel_category_id: int
 
@@ -25,6 +26,7 @@ class TicketTypeSchema(BaseModel):
 
     name: str = Field(max_length=16)
     description: str = Field(max_length=4096)
+    embed_color: int
 
     ticket_channel_category_id: int
 
@@ -47,6 +49,7 @@ class TicketTypeUpdate(BaseModel):
 
     name: str | None = Field(None, max_length=16)
     description: str | None = Field(None, max_length=4096)
+    embed_color: int | None = Field(None)
 
     ticket_channel_category_id: int | None = Field(None)
 

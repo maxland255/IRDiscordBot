@@ -7,7 +7,7 @@ from bot.database.schemas import EmbedsCreate, EmbedsSchema, EmbedsUpdate, Embed
     EmbedFieldsUpdate
 from bot.exception import EmbedsNotFound, EmbedFieldsNotFound
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -124,6 +124,15 @@ class EmbedsRepository(Protocol):
         """
         Soft delete specific Embed Fields data.
         :param embed_field:
+        :return:
+        """
+        ...
+
+    @abstractmethod
+    async def get_next_position(self, embed_id: int) -> int:
+        """
+        Get the next position for an embed field in a specific embed.
+        :param embed_id:
         :return:
         """
         ...
@@ -273,3 +282,18 @@ class SQLAlchemyEmbedsRepository(EmbedsRepository):
 
     async def delete_embed_fields(self, embed_field: EmbedFieldsSchema) -> None:
         await self.delete_embeds_by_id(embed_field.id)
+
+    async def get_next_position(self, embed_id: int) -> int:
+        async with self.session_factory() as session:
+            query = (
+                select(func.max(EmbedFields.position))
+                .where(EmbedFields.embed_id == embed_id)
+            )
+
+            result = await session.execute(query)
+
+            max_position = result.scalar()
+
+            current_position = max_position if max_position is not None else 0
+
+            return current_position + 1

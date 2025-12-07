@@ -90,6 +90,7 @@ class EditEmbedFieldModal(DesignerModal):
                     name=field_name,
                     value=field_value,
                     inline=field_inline,
+                    position=await self.bot.db_embeds.get_next_position(self.embed.id),
                 )
 
                 embed_field = await self.bot.db_embeds.create_embed_fields(embed_field)
