@@ -35,6 +35,8 @@ def _print_help():
     print("  docker-dev     : Lance le bot en mode développement avec Docker (rechargement auto).")
     print("  docker-prod    : Déploie le bot en production avec Docker.")
     print("  docker-down    : Arrête les conteneurs Docker lancés par ce script.")
+    print("  db-migrate     : Gère les migrations de la base de données (Alembic).")
+    print("  db-upgrade     : Applique les migrations de la base de données.")
 
 
 def _run_command(command, shell=False):
@@ -129,6 +131,20 @@ def command_docker_down():
     _run_command(["docker-compose", "down"])
 
 
+def command_db_migrate(message: str):
+    """Gère les migrations de la base de données avec Alembic."""
+    print("🔄 Lancement d'Alembic pour gérer les migrations de la base de données...")
+    _run_command([_get_python_executable(), "-m", "alembic", "revision", "--autogenerate", "-m", message])
+    print("✅ Migration créée.")
+
+
+def command_db_upgrade():
+    """Applique les migrations de la base de données avec Alembic."""
+    print("⬆️  Application des migrations de la base de données avec Alembic...")
+    _run_command([_get_python_executable(), "-m", "alembic", "upgrade", "head"])
+    print("✅ Migrations appliquées.")
+
+
 if __name__ == "__main__":
     check_python_version()
 
@@ -150,6 +166,15 @@ if __name__ == "__main__":
         command_docker_prod()
     elif command == "docker-down":
         command_docker_down()
+    elif command == "db-migrate":
+        if len(sys.argv) < 3:
+            print("Erreur: Veuillez fournir un message pour la migration.")
+            sys.exit(1)
+        message = sys.argv[2]
+
+        command_db_migrate(message)
+    elif command == "db-upgrade":
+        command_db_upgrade()
     elif command == "help":
         _print_help()
     else:

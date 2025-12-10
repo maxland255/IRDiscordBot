@@ -55,7 +55,7 @@ class GravityLevel(Base):
     __tablename__ = "gravity_levels"
     __table_args__ = {'sqlite_autoincrement': True}
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
@@ -155,7 +155,7 @@ class RolePanel(Base):
     __tablename__ = "role_panels"
     __table_args__ = {'sqlite_autoincrement': True}
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
 
@@ -203,7 +203,7 @@ class TicketType(Base):
     __tablename__ = "ticket_types"
     __table_args__ = {'sqlite_autoincrement': True}
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     guild_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("guilds.id", ondelete="CASCADE"), nullable=False,
                                           index=True)
 
