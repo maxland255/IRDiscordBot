@@ -116,7 +116,7 @@ class TicketPanelView(DesignerView):
             title=f"{self.ticket_type.name} Ticket",
             description=self.ticket_type.description,
             timestamp=datetime.now(UTC),
-            colour=0x3498db,
+            colour=self.ticket_type.embed_color,
         )
 
         return ticket_panel_embed
