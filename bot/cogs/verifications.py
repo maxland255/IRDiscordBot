@@ -83,6 +83,13 @@ class Verifications(Cog, CogsBase):
                         )
 
                         await member.kick(reason="Failed to complete verification in time.")
+                        
+                        await self.bot.logger.verification.kick_unverified_new_member(
+                            guild,
+                            member,
+                            entry,
+                            "Failed to complete verification in time.",
+                        )
                     except (discord.Forbidden, discord.HTTPException):
                         pass
 

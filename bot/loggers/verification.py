@@ -75,3 +75,36 @@ class VerificationLogger:
             await self.bot.db_logs_entries.create_log_entry(new_log_entry)
         except Exception as e:
             logger.error(f"Error logging manual verification for member {member.id} in guild {guild.id}", exc_info=e)
+
+    async def kick_unverified_new_member(self, guild: Guild, member: Member, verification: VerificationsSchema,
+                                         reason: str | None = None):
+        try:
+            new_log_entry = LogEntryCreate(
+                guild_id=guild.id,
+                log_type=LogEntryType.verification_expired,
+                actor_id=self.bot.user.id,
+                target_id=member.id,
+                details={
+                    "verification": verification.model_dump_json(indent=None),
+                },
+                created_at=datetime.now(UTC),
+            )
+
+            logs_channel = await self._get_log_channel(guild.id)
+
+            if logs_channel is not None:
+                embed_log = await generic_embed(
+                    title="Verification Expired",
+                    description=f"The member {member.mention} does not pass the verification process.\nThe result is a kick !",
+                    color=Color.red(),
+                    member=member.mention,
+                    result="Member is kicked",
+                    reason=reason,
+                    verification_status=verification.status,
+                )
+
+                await logs_channel.send(embed=embed_log)
+
+            await self.bot.db_logs_entries.create_log_entry(new_log_entry)
+        except Exception as e:
+            logger.error(f"Error logging kick unverified member {member.id} in guild {guild.id}", exc_info=e)

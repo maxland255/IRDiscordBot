@@ -14,6 +14,7 @@ class LogEntryType(str, Enum):
 
     # Verification
     verification_manual = "VERIFICATION_MANUAL"
+    verification_expired = "VERIFICATION_EXPIRED"
 
     unknown = "UNKNOWN"
 
