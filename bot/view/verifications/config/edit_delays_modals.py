@@ -65,7 +65,7 @@ class EditVerificationDelaysModal(DesignerModal):
                 )
                 return
 
-            if new_member_verification_time_limit <= 0 or grace_period_days < 0:
+            if new_member_verification_time_limit < 0 or grace_period_days < 0:
                 await interaction.response.send_message(
                     "Please enter positive values for delays.",
                     ephemeral=True,

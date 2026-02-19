@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Literal
 from datetime import datetime, UTC
 from functools import partial
 
-from discord import ButtonStyle, Interaction, Embed, Member, Guild
+from discord import ButtonStyle, Interaction, Embed, Member, Role
 from discord.ui import DesignerView, ActionRow
 
 from bot.view.components import ActionButton
@@ -92,7 +92,7 @@ class TicketVerifResultPanelView(DesignerView):
         if member.guild_permissions.administrator:
             return True
 
-        moderator_role = await member.guild.get_or_fetch(Guild, ticket.ticket_type.moderator_role_id)
+        moderator_role = await member.guild.get_or_fetch(Role, ticket.ticket_type.moderator_role_id)
 
         if moderator_role in member.roles:
             return True
@@ -110,7 +110,7 @@ class TicketVerifResultPanelView(DesignerView):
 
         panel_embed.set_author(
             name=member.display_name,
-            icon_url=member.avatar.url,
+            icon_url=member.avatar.url if member.avatar is not None else None,
         )
 
         return panel_embed
