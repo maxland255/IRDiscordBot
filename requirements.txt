@@ -1,6 +1,6 @@
 py-cord~=2.7.1
 pydantic~=2.12.5
-pydantic-settings~=2.13.0
+pydantic-settings~=2.13.1
 colorlog~=6.10.1
 sqlalchemy[asyncio]~=2.0.45
 aiosqlite~=0.22.1

@@ -58,6 +58,10 @@ class Verifications(Cog, CogsBase):
                                                                                                   kick_before_date)
 
                 for entry in member_to_kick:
+                    if entry.joined_at > kick_before_date:
+                        # Verification if an error is occurred with the SQL condition
+                        continue
+
                     member = await guild.get_or_fetch(Member, entry.user_id)
 
                     if member is None:
@@ -83,7 +87,7 @@ class Verifications(Cog, CogsBase):
                         )
 
                         await member.kick(reason="Failed to complete verification in time.")
-                        
+
                         await self.bot.logger.verification.kick_unverified_new_member(
                             guild,
                             member,
