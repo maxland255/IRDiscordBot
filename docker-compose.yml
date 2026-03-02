@@ -6,6 +6,7 @@ services:
     build:
       context: .
       target: production
+    stop_grace_period: 2m
     # Name of the image created and container name
     image: ir-discord-bot:latest
     container_name: ir-discord-bot-prod

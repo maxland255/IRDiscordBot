@@ -25,6 +25,7 @@ from .database.repositories import SQLAlchemyGuildRepository, SQLAlchemyGravityL
     SQLAlchemyTicketTypeRepository, SQLAlchemyVerificationsRepository, SQLAlchemyEmbedsRepository
 
 from discord import Bot, Intents
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 setup_logging()
 
@@ -37,7 +38,7 @@ class IRBot(Bot):
 
         self._has_init = False
 
-        self._engine = None
+        self._engine: AsyncEngine | None = None
         self._AsyncSession = None
 
         if self.settings.ENV == "dev":
@@ -64,6 +65,28 @@ class IRBot(Bot):
         :return:
         """
         super().run(self.settings.DISCORD_BOT_TOKEN.get_secret_value())
+
+    async def close(self) -> None:
+        await self._send_shutdown_message()
+
+        await self._engine.dispose()
+
+        logger.info(f"Shutting down bot...")
+
+        await super().close()
+
+    async def _send_shutdown_message(self) -> None:
+        """
+        Send a shutdown message to the log channel if configured.
+        :return:
+        """
+        guild = await self.db_guilds.get_all_guilds()
+
+        for g in guild:
+            if g.logs_server is not None:
+                channel = self.get_channel(g.logs_server)
+                if channel is not None:
+                    await channel.send(f"⚠️ {self.user.mention} ({self.user.display_name}) Bot is shutting down...")
 
     def _load_cogs(self):
         logger.info("Loading cogs...")
