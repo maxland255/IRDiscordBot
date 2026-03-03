@@ -387,41 +387,40 @@ class SQLAlchemyVerificationsRepository(VerificationsRepository):
         return await self.delete_verification_by_id(verification.id)
 
     async def check_email_rate_limit(self, guild_id: int, user_id: int) -> None:
-        async with self.session() as session:
-            entry = await self.get_verification_by_user_id(guild_id, user_id, raise_if_not_found=True)
+        entry = await self.get_verification_by_user_id(guild_id, user_id, raise_if_not_found=True)
 
-            now = datetime.now(UTC)
-            today = now.date()
+        now = datetime.now(UTC)
+        today = now.date()
 
-            update_verification = VerificationsUpdate(
-                id=entry.id,
+        update_verification = VerificationsUpdate(
+            id=entry.id,
+        )
+
+        if entry.last_email_sent_at:
+            last_email_sent_at = entry.last_email_sent_at.replace(tzinfo=UTC)
+
+            cooldown_end = last_email_sent_at + timedelta(minutes=2)
+            if now < cooldown_end:
+                retry_after = (cooldown_end - now).total_seconds()
+                raise VerificationRateLimitError("Email send rate limit exceeded. Please wait before trying again.",
+                                                 retry_after)
+
+        if entry.last_attempt_date != today:
+            update_verification.daily_attempts = 0
+            update_verification.last_attempt_date = today
+
+        if entry.daily_attempts >= 5:
+            tomorrow = now.date() + timedelta(days=1)
+
+            raise VerificationRateLimitError(
+                "You have reached the maximum number of email verification attempts for today. Please try again tomorrow.",
+                retry_after=(datetime.combine(tomorrow, datetime.min.time(), tzinfo=UTC) - now).total_seconds()
             )
 
-            if entry.last_email_sent_at:
-                last_email_sent_at = entry.last_email_sent_at.replace(tzinfo=UTC)
+        if update_verification.daily_attempts is None:
+            update_verification.daily_attempts = 0
 
-                cooldown_end = last_email_sent_at + timedelta(minutes=2)
-                if now < cooldown_end:
-                    retry_after = (cooldown_end - now).total_seconds()
-                    raise VerificationRateLimitError("Email send rate limit exceeded. Please wait before trying again.",
-                                                     retry_after)
+        update_verification.daily_attempts = entry.daily_attempts + 1
+        update_verification.last_email_sent_at = now
 
-            if entry.last_attempt_date != today:
-                update_verification.daily_attempts = 0
-                update_verification.last_attempt_date = today
-
-            if entry.daily_attempts >= 5:
-                tomorrow = now.date() + timedelta(days=1)
-
-                raise VerificationRateLimitError(
-                    "You have reached the maximum number of email verification attempts for today. Please try again tomorrow.",
-                    retry_after=(datetime.combine(tomorrow, datetime.min.time(), tzinfo=UTC) - now).total_seconds()
-                )
-
-            if update_verification.daily_attempts is None:
-                update_verification.daily_attempts = 0
-
-            update_verification.daily_attempts += 1
-            update_verification.last_email_sent_at = now
-
-            await self.update_verification(update_verification)
+        await self.update_verification(update_verification)
