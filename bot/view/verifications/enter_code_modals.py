@@ -53,13 +53,14 @@ class EnterCodeModals(DesignerModal):
 
     async def callback(self, interaction: Interaction):
         try:
+            await interaction.response.defer(ephemeral=True, invisible=False)
+
             verification = await self.bot.db_verifications.get_verification_by_user_id(interaction.guild_id,
                                                                                        interaction.user.id)
 
             if verification is None or verification.deleted_at is not None:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "An error occurred while processing your verification code. Please contact an administrator.",
-                    ephemeral=True,
                 )
                 return
 
@@ -69,9 +70,8 @@ class EnterCodeModals(DesignerModal):
             code_expires_at = code_expires_at.replace(tzinfo=UTC)
 
             if code_expires_at < datetime.now(UTC):
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Your verification code has expired. Please start the verification process again to receive a new code.",
-                    ephemeral=True,
                 )
                 return
 
@@ -90,27 +90,23 @@ class EnterCodeModals(DesignerModal):
                     logger.error(
                         f"ValueError in EnterCodeModals callback for user {interaction.user.id} in guild {interaction.guild_id}.",
                         exc_info=e)
-                    await interaction.response.send_message(
+                    await interaction.followup.send(
                         "An error occurred while updating your verification status. Please contact an administrator.",
-                        ephemeral=True,
                     )
                     return
             else:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "The verification code you entered is incorrect. Please try again.",
-                    ephemeral=True,
                 )
                 return
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Your email has been successfully verified! You now have access to the server.",
-                ephemeral=True,
             )
         except Exception as e:
             logger.error(
                 f"Error in EnterCodeModals callback for user {interaction.user.id} in guild {interaction.guild_id}.",
                 exc_info=e)
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "An error occurred while processing your verification code. Please try again later or contact an administrator.",
-                ephemeral=True,
             )
