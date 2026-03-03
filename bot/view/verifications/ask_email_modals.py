@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 from datetime import datetime, UTC, timedelta
 
-from discord import Interaction
+from discord import Interaction, Member
 from discord.ui import DesignerModal, InputText, Label
 
 from bot.database.schemas import VerificationsSchema, VerificationsUpdate
@@ -35,7 +35,19 @@ class AskEmailModals(DesignerModal):
             item=self.email_input,
         )
 
+        self.name_input = InputText(
+            required=False,
+            placeholder="Prénom + Nom (Ex: Ada Lovelace)",
+            max_length=32,
+        )
+
+        self.name_label = Label(
+            label="Full Name",
+            item=self.name_input,
+        )
+
         self.add_item(self.email_label)
+        self.add_item(self.name_label)
 
     async def callback(self, interaction: Interaction):
         try:
@@ -50,6 +62,18 @@ class AskEmailModals(DesignerModal):
                     "An error occurred while trying to start the email verification process. Please contact an administrator.",
                 )
                 return
+
+            if self.name_input.value is not None:
+                try:
+                    member = interaction.user
+
+                    if isinstance(member, Member):
+                        await member.edit(nick=self.name_input.value)
+                except Exception as e:
+                    logger.error(
+                        f"Failed to update nickname for user {interaction.user.id} in guild {interaction.guild_id}, Value: {self.name_input.value}",
+                        exc_info=e,
+                    )
 
             secret_code = secrets.token_hex(3).upper()
 
