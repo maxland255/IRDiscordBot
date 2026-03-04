@@ -58,7 +58,7 @@ class Verifications(Cog, CogsBase):
                                                                                                   kick_before_date)
 
                 for entry in member_to_kick:
-                    if entry.joined_at > kick_before_date:
+                    if entry.joined_at.replace(tzinfo=UTC) > kick_before_date:
                         # Verification if an error is occurred with the SQL condition
                         continue
 
