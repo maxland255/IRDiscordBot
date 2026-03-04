@@ -3,12 +3,12 @@ import logging
 from typing import TYPE_CHECKING
 from datetime import datetime, timedelta, UTC
 
-from discord import ButtonStyle, Interaction, Embed, Guild
+from discord import ButtonStyle, Interaction, Embed, Guild, Member
 from discord.ui import DesignerView, ActionRow
 
 from bot.view.components import ActionButton
 from bot.database.schemas import VerificationStatus, VerificationsUpdate
-from bot.exception import VerificationRateLimitError
+from bot.exception import VerificationRateLimitError, VerificationNotFound
 
 from .ask_email_modals import AskEmailModals
 from .enter_code_modals import EnterCodeModals
@@ -17,6 +17,7 @@ from .ticket_verif_result_panel_view import TicketVerifResultPanelView
 if TYPE_CHECKING:
     from bot.main import IRBot
     from bot.cogs.tickets import Tickets
+    from bot.cogs.verifications import Verifications
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,33 @@ class VerificationChooseView(DesignerView):
                         ephemeral=True,
                     )
                     return
+            except VerificationNotFound as e:
+                logger.error(
+                    f"Verification entry not found for user {interaction.user.id} in guild {interaction.guild_id}, Creating a new one.",
+                    exc_info=e,
+                )
+                verification_cog: "Verifications | None" = self.bot.get_cog("Verifications")
+
+                if verification_cog is None:
+                    logger.critical(
+                        f"Verification cog not found while trying to create a new verification entry for user {interaction.user.id} in guild {interaction.guild_id}.",
+                    )
+                    await interaction.response.send_message(
+                        "An error occurred while trying to start the email verification process. Please contact an administrator.",
+                        ephemeral=True,
+                    )
+                    return
+
+                if not isinstance(interaction.user, Member):
+                    logger.critical(
+                        f"Interaction user is not a Member while trying to create a new verification entry for user {interaction.user.id} in guild {interaction.guild_id}.",
+                    )
+                    await interaction.response.send_message(
+                        "An error occurred while trying to start the email verification process. Please contact an administrator.",
+                        ephemeral=True,
+                    )
+
+                await verification_cog.handle_new_member(interaction.user, None)
 
             verification = await self.bot.db_verifications.get_verification_by_user_id(interaction.guild_id,
                                                                                        interaction.user.id)

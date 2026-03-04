@@ -215,9 +215,9 @@ class Verifications(Cog, CogsBase):
                     await self._handle_existing_member_verification(member, verification)
                 case _:
                     # User is in the process of verification, reset the process
-                    await self._handle_new_member(member, verification)
+                    await self.handle_new_member(member, verification)
         else:
-            await self._handle_new_member(member)
+            await self.handle_new_member(member)
 
     @Cog.listener("on_raw_member_remove")
     async def _on_raw_member_remove(self, payload: RawMemberRemoveEvent):
@@ -257,14 +257,14 @@ class Verifications(Cog, CogsBase):
 
             if verification.verification_expires_at is not None and verification.verification_expires_at < now:
                 # Verification has expired, update status to reset the verification
-                await self._handle_new_member(member, verification)
+                await self.handle_new_member(member, verification)
             else:
                 # Verification is still valid, reapply roles if necessary
                 await self.set_member_status(self.bot, member.guild, member, verification, verification.status)
         else:
             await self.set_member_status(self.bot, member.guild, member, verification, verification.status)
 
-    async def _handle_new_member(self, member: Member, existing_verification: VerificationsSchema | None = None):
+    async def handle_new_member(self, member: Member, existing_verification: VerificationsSchema | None = None):
         try:
             if existing_verification is not None:
                 update_verification = VerificationsUpdate(
