@@ -34,7 +34,8 @@ logger = logging.getLogger("ir-bot")
 
 class IRBot(Bot):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, intents=Intents.all())
+        super().__init__(*args, **kwargs, intents=Intents.all(),
+                         debug_guilds=[self.settings.GUILD_ID] if self.settings.GUILD_ID is not None else [])
 
         self._has_init = False
 

@@ -610,6 +610,85 @@ class Verifications(Cog, CogsBase):
             )
             return
 
+    @verification_admin.command(
+        name="get_verification",
+        description="Get the verification information for a member",
+    )
+    async def verification_admin_get_verification(
+            self,
+            ctx: ApplicationContext,
+            member: Member = Option(
+                Member,
+                description="The member to get the verification information for",
+                required=True,
+            )
+    ):
+        try:
+            await ctx.defer(ephemeral=True)
+
+            verification = await self.bot.db_verifications.get_verification_by_user_id(ctx.guild_id, member.id)
+
+            if verification is None:
+                await ctx.respond(
+                    f"{member.mention} does not have a verification entry.",
+                    ephemeral=True,
+                )
+                return
+
+            verif_embed = Embed(
+                title=f"Verification Information {member.display_name}",
+                color=Color.brand_green(),
+            )
+
+            verif_embed.add_field(
+                name="Joined at",
+                value=verification.joined_at.strftime("Joined at: %Y-%m-%d %H:%M:%S UTC"),
+                inline=False,
+            )
+
+            verif_embed.add_field(
+                name="Verification Status",
+                value=verification.status.name,
+                inline=False,
+            )
+
+            verif_embed.add_field(
+                name="Verification Expires At",
+                value=verification.verification_expires_at.strftime(
+                    "%Y-%m-%d %H:%M:%S UTC") if verification.verification_expires_at else "N/A",
+                inline=False,
+            )
+
+            verif_embed.add_field(
+                name="Grace Period Ends At",
+                value=verification.grace_period_ends_at.strftime(
+                    "%Y-%m-%d %H:%M:%S UTC") if verification.grace_period_ends_at else "N/A",
+                inline=False,
+            )
+
+            verif_embed.add_field(
+                name="Last Email Sent At",
+                value=verification.last_email_sent_at.strftime(
+                    "%Y-%m-%d %H:%M:%S UTC") if verification.last_email_sent_at else "N/A",
+                inline=False,
+            )
+
+            verif_embed.add_field(
+                name="User Email",
+                value=verification.user_email if verification.user_email else "N/A",
+                inline=False,
+            )
+
+            await ctx.respond(embed=verif_embed)
+        except Exception as e:
+            logger.error(f"Error getting verification for member {member.id} in guild {member.guild.id}",
+                         exc_info=e)
+            await ctx.respond(
+                f"An error occurred while trying to get the verification for {member.mention}. Please contact an administrator.",
+                ephemeral=True,
+            )
+            return
+
     # Static methods
     @staticmethod
     async def set_member_status(bot: "IRBot", guild: Guild, member: Member, verification: VerificationsSchema,

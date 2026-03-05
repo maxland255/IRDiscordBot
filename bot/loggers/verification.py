@@ -86,6 +86,7 @@ class VerificationLogger:
                 target_id=member.id,
                 details={
                     "verification": verification.model_dump_json(indent=None),
+                    "server_join_date": member.joined_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
                 },
                 created_at=datetime.now(UTC),
             )
@@ -96,6 +97,8 @@ class VerificationLogger:
                 embed_log = await generic_embed(
                     title="Verification Expired",
                     description=f"The member {member.mention} does not pass the verification process.\nThe result is a kick !",
+                    joined_at=verification.joined_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
+                    server_join_date=member.joined_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
                     color=Color.red(),
                     member=member.mention,
                     result="Member is kicked",
