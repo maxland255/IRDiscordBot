@@ -145,11 +145,3 @@ Une fois lancé, vous pouvez suivre l'activité du bot dans le dossier `/logs` o
 docker compose logs -f bot-prod
 
 ```
-
----
-
-## 🛠 Prochaines étapes
-
-Une fois le bot en ligne, rendez-vous dans la
-section [Configuration en ligne](https://www.google.com/search?q=./configuration.md) pour apprendre à configurer les
-domaines d'emails et les rôles via Discord !

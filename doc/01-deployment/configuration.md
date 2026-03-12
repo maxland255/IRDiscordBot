@@ -87,12 +87,3 @@ Le bot intègre une fonctionnalité de signalement native via les **Context Menu
 En configurant un `warn_height` faible (ex: `0.1`), vous permettez aux étudiants de faire quelques erreurs mineures
 avant que la sanction ne devienne lourde. À l'inverse, un récidiviste verra la durée de ses timeouts augmenter de façon
 exponentielle à chaque nouvelle faute, protégeant ainsi la sérénité du serveur sans intervention manuelle complexe.
-
----
-
-## 📘 Prochaines étapes
-
-Maintenant que le coeur du bot est configuré, passons à l'organisation des fonctionnalités spécifiques :
-
-* [Vérification SMTP & Email](https://www.google.com/search?q=./functionality/verification.md)
-* [Système de Tickets & Embeds](https://www.google.com/search?q=./functionality/tickets.md)
