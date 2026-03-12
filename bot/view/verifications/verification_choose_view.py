@@ -58,6 +58,8 @@ class VerificationChooseView(DesignerView):
 
     async def _verification_by_email(self, interaction: Interaction):
         try:
+            # await interaction.response.defer(ephemeral=True, invisible=False)
+
             try:
                 await self.bot.db_verifications.check_email_rate_limit(interaction.guild_id, interaction.user.id)
             except VerificationRateLimitError as e:
@@ -141,24 +143,32 @@ class VerificationChooseView(DesignerView):
                 f"Error starting email verification for user {interaction.user.id} in guild {interaction.guild_id}",
                 exc_info=e,
             )
-            await interaction.response.send_message(
-                "An error occurred while trying to start the email verification process. Please contact an administrator.",
-                ephemeral=True,
-            )
+            if interaction.response.is_done():
+                await interaction.followup.send(
+                    "An error occurred while trying to start the email verification process. Please contact an administrator.",
+                    ephemeral=True,
+                )
+            else:
+                await interaction.response.send_message(
+                    "An error occurred while trying to start the email verification process. Please contact an administrator.",
+                    ephemeral=True,
+                )
 
     async def _verification_manual(self, interaction: Interaction):
         try:
+            await interaction.response.defer(ephemeral=True, invisible=False)
+
             guild_config = await self.bot.db_guilds.get_guild_by_id(interaction.guild_id)
 
             if guild_config is None or guild_config.deleted_at is not None:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "An error occurred while trying to start the manual verification process. Please contact an administrator.",
                     ephemeral=True,
                 )
                 return
 
             if guild_config.verification_ticket_type_id is None:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Manual verification is not configured on this server. Please contact an administrator.",
                     ephemeral=True,
                 )
@@ -168,7 +178,7 @@ class VerificationChooseView(DesignerView):
                                                                                        interaction.user.id)
 
             if verification is None or verification.deleted_at is not None:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "An error occurred while trying to start the email verification process. Please contact an administrator.",
                     ephemeral=True,
                 )
@@ -179,13 +189,13 @@ class VerificationChooseView(DesignerView):
                 VerificationStatus.verified_alumni,
                 VerificationStatus.verified_external
             ]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "✅ Vous êtes déjà vérifié sur ce serveur.",
                     ephemeral=True,
                 )
                 return
             elif verification.status == VerificationStatus.pending_manual and verification.ticket_id is not None:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "⏳ Votre demande d'accès manuel est déjà en cours de traitement par un administrateur.",
                     ephemeral=True,
                 )
@@ -194,7 +204,7 @@ class VerificationChooseView(DesignerView):
             tickets_cog: "Tickets | None" = self.bot.get_cog("Tickets")
 
             if tickets_cog is None:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Ticketing system is currently unavailable. Please contact an administrator.",
                     ephemeral=True,
                 )
@@ -217,7 +227,7 @@ class VerificationChooseView(DesignerView):
 
             await self.bot.db_verifications.update_verification(update_verification)
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"✅ Your manual verification request has been submitted. Please describe your situation in the ticket created for you ({ticket_channel.mention}).",
                 ephemeral=True,
             )
@@ -226,10 +236,16 @@ class VerificationChooseView(DesignerView):
                 f"Error starting manual verification for user {interaction.user.id} in guild {interaction.guild_id}",
                 exc_info=e,
             )
-            await interaction.response.send_message(
-                "An error occurred while trying to start the manual verification process. Please contact an administrator.",
-                ephemeral=True,
-            )
+            if interaction.response.is_done():
+                await interaction.followup.send(
+                    "An error occurred while trying to start the manual verification process. Please contact an administrator.",
+                    ephemeral=True,
+                )
+            else:
+                await interaction.response.send_message(
+                    "An error occurred while trying to start the manual verification process. Please contact an administrator.",
+                    ephemeral=True,
+                )
 
     async def _verification_enter_code(self, interaction: Interaction):
         try:
