@@ -154,7 +154,7 @@ class IRBot(Bot):
 
     # Global events
     async def _on_ready(self):
-        logger.info(f"Bot is ready as {bot.user}")
+        logger.info(f"Bot is ready as {self.user}")
 
         if not self._has_init:
             self._has_init = True
@@ -251,9 +251,11 @@ class IRBot(Bot):
         return self._verification_mail_service
 
 
-bot: IRBot | None = None
-
-if __name__ == "__main__":
+def main() -> None:
     bot = IRBot()
 
     bot.run()
+
+
+if __name__ == "__main__":
+    main()
