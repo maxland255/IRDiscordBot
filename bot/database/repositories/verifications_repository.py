@@ -406,6 +406,8 @@ class SQLAlchemyVerificationsRepository(VerificationsRepository):
                                                  retry_after)
 
         if entry.last_attempt_date != today:
+            # Set the entry daily_attempts to 0 for the next condition
+            entry.daily_attempts = 0
             update_verification.daily_attempts = 0
             update_verification.last_attempt_date = today
 
